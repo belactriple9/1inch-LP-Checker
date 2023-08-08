@@ -33,7 +33,7 @@
 
             $('#checkAcct').on('click', async function (e) {
                 e.preventDefault();
-
+                $('#loadingModal').show();
                 const usrAddress = await signer.getAddress();
 
                 const BNBPoolFactory = "0xD41B24bbA51fAc0E4827b6F94C0D6DDeB183cD64";
@@ -62,9 +62,20 @@
 
                 // once every 5 seconds, check `balanceOf` the user's address for batches of 100 tokens
                 const batchSize = 100;
-                for (i = 0; i < Math.ceil(Math.max(allETHPools.length, allBNBPools.length) / batchSize); i++) {
+                let maxValueOfi = 1 + Math.ceil(Math.max(allETHPools.length, allBNBPools.length) / batchSize);
+                for (let i = 0; i < maxValueOfi; i++) {
                     handleMulticalls(i, multicallContractETH, multicallContractBSC, allETHPools, allBNBPools, usrAddress);
                 }
+                // do a fancy countdown to show the user how long they have to wait
+                for(let t = maxValueOfi*5; t > 0; t--) {
+                    setTimeout(function() {
+                        $('#loadingModal').find('p').text(`Please wait, still loading... ${t}`);
+                    }, 1000 * (maxValueOfi*5 - t));
+                }
+
+                setTimeout(function () {
+                    $('#loadingModal').hide();
+                }, 5000 * maxValueOfi);
 
 
             })
@@ -228,6 +239,40 @@ Click the withdraw button to initiate a transaction.
         </table>
     </div>
 
+    <div id="loadingModal" class="modal">
+        <div class="modal-content">
+            <p>Please wait, still loading...</p>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            text-align: center;
+        }
+    </style>
+
+    </style>
+    
+
 </body>
+
 
 </html>
