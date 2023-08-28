@@ -21,7 +21,7 @@
                     provider = new ethers.providers.Web3Provider(window.ethereum));
                 signer = provider.getSigner();
 
-                console.log(signer.getAddress());
+                // console.log(signer.getAddress());
 
                 if (await signer.getAddress() != null && await signer.getAddress() != "") {
                     $('#connect-wallet').text(await signer.getAddress());
@@ -35,6 +35,89 @@
                 e.preventDefault();
                 $('#loadingModal').show();
                 const usrAddress = await signer.getAddress();
+
+                /**
+                 * function defined twice because of scoping issues, too lazy to fix, sorry
+                 */
+                function processMulticallResults(result, batch, chainId) {
+                for (let k = 0; k < result[1].length; k++) {
+                    if (result[1][k] !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+                        let row = document.createElement("tr");
+                        let token = document.createElement("td");
+                        let balance = document.createElement("td");
+                        let withdraw = document.createElement("td");
+                        let withdrawButton = document.createElement("button");
+
+                        token.innerHTML = batch[k].target;
+                        balance.innerHTML = result[1][k];
+                        withdrawButton.innerHTML = "Withdraw";
+
+                        const target = batch[k].target;
+                        const res = result[1][k];
+
+                        withdrawButton.onclick = function () {
+                            withdrawLiquidity(target, res, chainId);
+                        };
+
+                        withdraw.appendChild(withdrawButton);
+                        row.appendChild(token);
+                        row.appendChild(balance);
+                        row.appendChild(withdraw);
+                        document.getElementById("tbody").appendChild(row);
+                    }
+                }
+            }
+
+                async function withdrawLiquidity(to, amount, chain) {
+                    // Ensure window.ethereum is available
+                    if (!window.ethereum) {
+                        console.error("Ethereum provider not found");
+                        return;
+                    }
+
+                    // Mapping of chains to chain IDs
+                    const chainIDs = {
+                        "1": '0x1',
+                        "56": '0x38'
+                    };
+
+                    // Switch chain if the chainId exists in the mapping
+                    if (chainIDs[chain]) {
+                        try {
+                            await window.ethereum.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
+                        } catch (error) {
+                            console.error("Failed to switch Ethereum chain:", error);
+                            return;
+                        }
+                    } else {
+                        console.error("Unsupported chain:", chain);
+                        return;
+                    }
+
+                    // Reinitialize the provider and signer after the network switch
+                    let provider = new ethers.providers.Web3Provider(window.ethereum);
+                    let signer = provider.getSigner();
+
+                    const abi = [
+                        "function withdraw(uint256 amount, uint256[] minReturns)"
+                    ];
+
+                    // Create the contract instance with the signer
+                    let contract = new ethers.Contract(to, abi, signer);
+
+                    // Call the withdraw function and handle the result
+                    try {
+                        console.log({
+                            to: to,
+                            amount: amount,
+                            minReturns: [0, 0]
+                        });
+                        let result = await contract.withdraw(amount, [0, 0]);
+                        console.log(result);
+                    } catch (error) {
+                        console.error("Failed to withdraw:", error);
+                    }
+                }
 
                 const BNBPoolFactory = "0xD41B24bbA51fAc0E4827b6F94C0D6DDeB183cD64";
                 const ETHPoolFactory = "0xbAF9A5d4b0052359326A6CDAb54BABAa3a3A9643";
@@ -63,9 +146,48 @@
                 // once every 5 seconds, check `balanceOf` the user's address for batches of 100 tokens
                 const batchSize = 100;
                 let maxValueOfi = 1 + Math.ceil(Math.max(allETHPools.length, allBNBPools.length) / batchSize);
+
+                // console.log(allETHPools);
+                // console.log(allBNBPools);
                 for (let i = 0; i < maxValueOfi; i++) {
                     handleMulticalls(i, multicallContractETH, multicallContractBSC, allETHPools, allBNBPools, usrAddress);
                 }
+
+                // for some reason the first BNB pool is missed and the first 2 ETH pools are missed
+                // so we do them manually
+                let firstETHPool = allETHPools[0];
+                let secondETHPool = allETHPools[1];
+                let batch1 = [
+                    {
+                        target: firstETHPool,
+                        allowFailure: true,
+                        callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
+                    },
+                    {
+                        target: secondETHPool,
+                        allowFailure: true,
+                        callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
+                    }
+                ]
+
+                let firstBNBPool = allBNBPools[0];
+                let batch2 = [
+                    {
+                        target: firstBNBPool,
+                        allowFailure: true,
+                        callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
+                    }
+                ]
+
+                setTimeout(function () {
+                    multicallContractETH.callStatic.aggregate(batch1).then(function (result) {
+                        processMulticallResults(result, batch1, "1");
+                    });
+                    multicallContractBSC.callStatic.aggregate(batch2).then(function (result) {
+                        processMulticallResults(result, batch2, "56");
+                    });
+                }, 5000 * maxValueOfi);
+
                 // do a fancy countdown to show the user how long they have to wait
                 for(let t = maxValueOfi*5; t > 0; t--) {
                     setTimeout(function() {
@@ -84,12 +206,15 @@
         async function handleMulticalls(i, multicallContractETH, multicallContractBSC, allETHPools, allBNBPools, usrAddress) {
             let balanceETH = {};
             let balanceBSC = {};
+
+
             await setTimeout(function () {
                 let batchETH = [];
                 let batchBNB = [];
                 const batchSize = 100;
-                for (j = 1; j <= batchSize; j++) {
+                for (let j = 1; j <= batchSize; j++) {
                     if (allETHPools[i * batchSize + j]) {
+                        // console.log("ETH pool: " + allETHPools[i * batchSize + j])
                         batchETH.push(
                             {
                                 target: allETHPools[i * batchSize + j],
@@ -98,6 +223,7 @@
                             });
                     }
                     if (allBNBPools[i * batchSize + j]) {
+                        // console.log("BNB pool: " + allBNBPools[i * batchSize + j])
                         batchBNB.push(
                             {
                                 target: allBNBPools[i * batchSize + j],
