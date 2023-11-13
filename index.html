@@ -6,16 +6,61 @@
         src="https://cdn.jsdelivr.net/npm/@1inch/limit-order-protocol@1.3.0/abi/LimitOrderProtocol.json"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js" type="text/javascript"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
 
-    <script async>
+    <script async type="module">
+
+
+        const providers = [];
+        let providerIsEip6963 = false;
+        let providerEip6963Info; 
+
+        window.addEventListener(
+            "eip6963:announceProvider",
+            (event) => {
+                providers.push(event.detail);
+            }
+        );
+
+        window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+
+
+
+        let provider; // globally scoped variable for provider
+        let signer; // globally scoped variable for signer
+
+        async function connectEIP5953(info)
+
+        {
+            // scan through the providers array and find the one that matches the info we've received
+            for(let i = 0; i<providers.length; i++)
+            {
+                if(providers[i].info.name === info.name)
+                {
+                    provider = new ethers.providers.Web3Provider(providers[i].provider); // the "provider" here is the same as window.ethereum
+                    signer = provider.getSigner();
+                }
+            }
+        }
+
         $(() => {
-            let signer;
+
+            console.log(providers);
+
+
             // Disable 'checkAcct' button initially
             $('#checkAcct').prop('disabled', true);
 
             $('#connect-wallet').on('click', async function (e) {
                 e.preventDefault();
+
+                providerIsEip6963 = false;
+
+                if(!window.ethereum) {
+                    alert("Please install MetaMask to use this dApp!");
+                    return;
+                }   
 
                 window.ethereum.enable().then(
                     provider = new ethers.providers.Web3Provider(window.ethereum));
@@ -31,11 +76,88 @@
                 }
             })
 
+            
+
+            $('#connect-other-wallets').on('click', async function(e) {
+                e.preventDefault();
+                console.log("the other wallet");
+                providerIsEip6963 = true;
+
+                // here is where we'll generate a little modal containing a list of all the `providers` we've received
+                let modal = document.createElement("div");
+                modal.id = "modal";
+
+                // make the position absolute so we can center it
+                modal.style.position = "absolute";
+                modal.style.top = "20%",
+                modal.style.left = "50%";
+                modal.style.transform = "translate(-50%, -50%)";
+                modal.style.width = "100%";
+                modal.style.maxWidth = "400px";
+                modal.style.border = "1px solid black";
+                modal.style.borderRadius = "5px";
+                modal.style.background = "white";
+
+
+                for(let i = 0; i < providers.length; i++) {
+                    let tempDiv = document.createElement("div");
+                    tempDiv.style.display = "flex";
+                    tempDiv.style.flexDirection = "row";
+                    tempDiv.style.alignItems = "center";
+                    tempDiv.style.justifyContent = "center";
+                    tempDiv.style.width = "100%";
+                    tempDiv.style.height = "50px";
+                    tempDiv.style.borderBottom = "1px solid black";
+                    tempDiv.style.cursor = "pointer";
+
+                    let tempImg = document.createElement("img");
+                    tempImg.src = providers[i].info.icon;
+                    tempImg.style.width = "25px";
+                    tempImg.style.height = "25px";
+                    tempImg.style.objectFit = "contain";
+
+                    let tempName = document.createElement("p");
+                    tempName.innerHTML = providers[i].info.name;
+                    tempName.style.marginLeft = "10px";
+
+                    tempDiv.appendChild(tempImg);
+                    tempDiv.appendChild(tempName);
+
+                    tempDiv.onclick = async function() {
+                        await connectEIP5953(providers[i].info);
+                        modal.remove();
+                        $("#connect-other-wallets").text(await signer.getAddress());
+                        $('#checkAcct').prop('disabled', false);
+
+                    }
+
+                    modal.appendChild(tempDiv);
+                }
+
+                let closeButton = document.createElement("button");
+                closeButton.innerHTML = "Close";
+                closeButton.onclick = function() {
+                    modal.remove();
+                }
+                modal.appendChild(closeButton);
+
+                document.body.appendChild(modal);
+
+
+
+            })
+
+            function checkAndModifyStaking(addr)
+            {
+
+            }
+
             $('#checkAcct').on('click', async function (e) {
                 e.preventDefault();
                 $('#loadingModal').show();
-                const usrAddress = await signer.getAddress();
 
+                const usrAddress = await signer.getAddress();
+                checkAndModifyStaking(usrAddress);
                 /**
                  * function defined twice because of scoping issues, too lazy to fix, sorry
                  */
@@ -49,7 +171,7 @@
                         let withdrawButton = document.createElement("button");
 
                         token.innerHTML = batch[k].target;
-                        balance.innerHTML = result[1][k];
+                        balance.innerHTML = BigInt(result[1][k]).toString();
                         withdrawButton.innerHTML = "Withdraw";
 
                         const target = batch[k].target;
@@ -124,10 +246,15 @@
 
                 const ABI = [{ "inputs": [{ "internalType": "address", "name": "_poolOwner", "type": "address" }, { "internalType": "contract IMooniswapDeployer", "name": "_mooniswapDeployer", "type": "address" }, { "internalType": "address", "name": "_governanceMothership", "type": "address" }], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "decayPeriod", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "DefaultDecayPeriodVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "fee", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "DefaultFeeVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "slippageFee", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "DefaultSlippageFeeVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "contract Mooniswap", "name": "mooniswap", "type": "address" }, { "indexed": true, "internalType": "contract IERC20", "name": "token1", "type": "address" }, { "indexed": true, "internalType": "contract IERC20", "name": "token2", "type": "address" }], "name": "Deployed", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "feeCollector", "type": "address" }], "name": "FeeCollectorUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "governanceShare", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "GovernanceShareVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "governanceWallet", "type": "address" }], "name": "GovernanceWalletUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }], "name": "OwnershipTransferred", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }], "name": "Paused", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "referralShare", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "ReferralShareVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }], "name": "Unpaused", "type": "event" }, { "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "name": "allPools", "outputs": [{ "internalType": "contract Mooniswap", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "defaultDecayPeriod", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "defaultDecayPeriodVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "defaultDecayPeriodVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "defaultFee", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "defaultFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "defaultFeeVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "defaultSlippageFee", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "defaultSlippageFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "defaultSlippageFeeVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "defaults", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }, { "internalType": "uint256", "name": "", "type": "uint256" }, { "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "tokenA", "type": "address" }, { "internalType": "contract IERC20", "name": "tokenB", "type": "address" }], "name": "deploy", "outputs": [{ "internalType": "contract Mooniswap", "name": "pool", "type": "address" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardDefaultDecayPeriodVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardDefaultFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardDefaultSlippageFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardGovernanceShareVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardReferralShareVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "feeCollector", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getAllPools", "outputs": [{ "internalType": "contract Mooniswap[]", "name": "", "type": "address[]" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "governanceShare", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "governanceShareVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "governanceShareVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "governanceWallet", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "isActive", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "", "type": "address" }], "name": "isFeeCollector", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract Mooniswap", "name": "", "type": "address" }], "name": "isPool", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "mooniswapDeployer", "outputs": [{ "internalType": "contract IMooniswapDeployer", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "mothership", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }, { "internalType": "uint256", "name": "newBalance", "type": "uint256" }], "name": "notifyStakeChanged", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address[]", "name": "accounts", "type": "address[]" }, { "internalType": "uint256[]", "name": "newBalances", "type": "uint256[]" }], "name": "notifyStakesChanged", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "paused", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "poolOwner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "tokenA", "type": "address" }, { "internalType": "contract IERC20", "name": "tokenB", "type": "address" }], "name": "pools", "outputs": [{ "internalType": "contract Mooniswap", "name": "pool", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "referralShare", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "referralShareVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "referralShareVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newFeeCollector", "type": "address" }], "name": "setFeeCollector", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newGovernanceWallet", "type": "address" }], "name": "setGovernanceWallet", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "shareParameters", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }, { "internalType": "uint256", "name": "", "type": "uint256" }, { "internalType": "address", "name": "", "type": "address" }, { "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "shutdown", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "tokenA", "type": "address" }, { "internalType": "contract IERC20", "name": "tokenB", "type": "address" }], "name": "sortTokens", "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }, { "internalType": "contract IERC20", "name": "", "type": "address" }], "stateMutability": "pure", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "virtualDefaultDecayPeriod", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualDefaultFee", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualDefaultSlippageFee", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualGovernanceShare", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualReferralShare", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }];
 
+                // pull the rpcs from the input fields
+                let tempEthereumRpcUrl = document.getElementById('ethRPC').value;  
+                let tempEthereumv1RpcUrl = document.getElementById('ethRPCv1').value;
+                let tempBscRpcUrl = document.getElementById('bnbRPC').value;
+
                 // the abi above is the ABI for both factories
-                const BNBProvider = new ethers.providers.JsonRpcProvider('https://bsc-dataseed1.binance.org');
-                const ETHProvider = new ethers.providers.JsonRpcProvider('https://cloudflare-eth.com');
-                const ETHProviderv1point0 = new ethers.providers.JsonRpcProvider('https://eth.llamarpc.com');
+                const BNBProvider = new ethers.providers.JsonRpcProvider(tempBscRpcUrl);
+                const ETHProvider = new ethers.providers.JsonRpcProvider(tempEthereumRpcUrl);
+                const ETHProviderv1point0 = new ethers.providers.JsonRpcProvider(tempEthereumv1RpcUrl);
 
                 const bnbContract = new ethers.Contract(BNBPoolFactory, ABI, BNBProvider);
                 const ethContract = new ethers.Contract(ETHPoolFactory, ABI, ETHProvider);
@@ -147,7 +274,7 @@
                 const multicallContractBSC = new ethers.Contract(multicallAddr, multicallABI, BNBProvider);
 
                 // once every 5 seconds, check `balanceOf` the user's address for batches of 100 tokens
-                const batchSize = 100;
+                const batchSize = 1000;
                 let maxValueOfi = 1 + Math.ceil(Math.max(allETHPools.length, allBNBPools.length) / batchSize);
 
                 console.log(allETHPools);
@@ -232,7 +359,7 @@
                 let batchETH = [];
                 let batchETHOnePointOh = [];
                 let batchBNB = [];
-                const batchSize = 100;
+                const batchSize = 1000;
                 for (let j = 1; j <= batchSize; j++) {
                     if (allETHPools[i * batchSize + j]) {
                         // console.log("ETH pool: " + allETHPools[i * batchSize + j])
@@ -291,7 +418,7 @@
                         let withdrawButton = document.createElement("button");
 
                         token.innerHTML = batch[k].target;
-                        balance.innerHTML = result[1][k];
+                        balance.innerHTML = BigInt(result[1][k]).toString();
                         withdrawButton.innerHTML = "Withdraw";
 
                         const target = batch[k].target;
@@ -377,27 +504,71 @@
 This should help you withdraw liquidity from the 1inch liquidity protocol. 
 Simply connect your wallet and the system will list all your LP tokens. 
 Click the withdraw button to initiate a transaction. 
+
+Click "Connect wallet" to connect to your browser extension wallet. Otherwise use "Use Walletconnect" to connect to your mobile wallet. 
 ***************************************************************************
     </pre>
 
-    <button id="connect-wallet">Connect Wallet</button>
+
+
+
+
+    <button id="connect-wallet">Connect Metamask (default injected provider)</button>
+    <button id="connect-other-wallets">Other wallets</button>
 
     <!-- 'checkAcct' button initially disabled -->
-    <button id="checkAcct" disabled>Check Account</button>
+    <button id="checkAcct" disabled>Check For Liquidity</button>
+
+    <button id="checkStaking" disabled>Check Staking</button>
+    <hr>
+    <pre>
+***************************************************************************
+This is where you can enter in custom RPC information, leave blank to use default RPCs
+There are 2 ethereum RPCs to handle load balancing
+***************************************************************************
+    </pre>
+
+    <label for="ethRPC">Ethereum RPC</label>
+    <input type="text" id="ethRPC" name="ethRPC" value="https://cloudflare-eth.com">
+    <br>
+    <label for="ethRPC">Ethereum RPC</label>
+    <input type="text" id="ethRPCv1" name="ethRPCv1" value="https://eth.llamarpc.com">
+    <br>
+    <label for="bnbRPC">Binance RPC</label>
+    <input type="text" id="bnbRPC" name="bnbRPC" value="https://bsc-dataseed.binance.org/">
     <hr>
 
-    <div id="container">
-        <table id="table">
-            <thead>
-                <tr>
-                    <th>Token</th>
-                    <th>Balance</th>
-                    <th>Withdraw</th>
-                </tr>
-            </thead>
-            <tbody id="tbody">
-            </tbody>
-        </table>
+    <div> 
+        <div id="boxContainers">
+            <div id="container">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Balance</th>
+                            <th>Withdraw</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- <div id="stakingBox">
+                <table id="stakingTable">
+                    <thead>
+                        <tr>
+                            <th>Staking</th>
+                            <th>Tokens</th>
+                            <th>Withdraw</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staking-tbody">
+                    </tbody>
+                </table>
+            </div> -->
+        </div>
     </div>
 
     <div id="loadingModal" class="modal">
@@ -407,6 +578,20 @@ Click the withdraw button to initiate a transaction.
     </div>
 
     <style>
+
+        #boxContainers {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        #container {
+            width: 50%;
+            height: 100vh;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -430,7 +615,6 @@ Click the withdraw button to initiate a transaction.
         }
     </style>
 
-    </style>
     
 
 </body>
