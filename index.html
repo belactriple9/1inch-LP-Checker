@@ -11,6 +11,9 @@
     <script async type="module">
 
 
+        const FARMING_ABI = [{"inputs":[{"internalType":"contract Mooniswap","name":"_mooniswap","type":"address"},{"internalType":"contract IERC20","name":"_gift","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"decayPeriod","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"DecayPeriodVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"fee","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"FeeVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardPaid","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"slippageFee","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SlippageFeeVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Staked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},{"inputs":[],"name":"DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decayPeriod","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"decayPeriodVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"decayPeriodVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"discardDecayPeriodVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"discardFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"discardSlippageFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"earned","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"exit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"feeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"feeVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getReward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"gift","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastTimeRewardApplicable","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastUpdateTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mooniswap","outputs":[{"internalType":"contract Mooniswap","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mooniswapFactoryGovernance","outputs":[{"internalType":"contract IMooniswapFactoryGovernance","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"reward","type":"uint256"}],"name":"notifyRewardAmount","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"periodFinish","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"rewardDistribution","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerTokenStored","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardRate","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"rewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_rewardDistribution","type":"address"}],"name":"setRewardDistribution","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"slippageFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"slippageFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"slippageFeeVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"stake","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userRewardPerTokenPaid","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+
+
         const providers = [];
         let providerIsEip6963 = false;
         let providerEip6963Info; 
@@ -28,6 +31,7 @@
 
 
         let provider; // globally scoped variable for provider
+        let eip6963ProviderNumber; // globally scoped variable for provider number
         let signer; // globally scoped variable for signer
 
         async function connectEIP5953(info)
@@ -38,8 +42,12 @@
             {
                 if(providers[i].info.name === info.name)
                 {
+
                     provider = new ethers.providers.Web3Provider(providers[i].provider); // the "provider" here is the same as window.ethereum
+                    console.log("provider", provider);
                     signer = provider.getSigner();
+                    console.log("signer", signer);
+                    eip6963ProviderNumber = i;
                 }
             }
         }
@@ -69,6 +77,7 @@
                 // console.log(signer.getAddress());
 
                 if (await signer.getAddress() != null && await signer.getAddress() != "") {
+                    console.log(signer);
                     $('#connect-wallet').text(await signer.getAddress());
 
                     // Enable 'checkAcct' button after successful connection
@@ -126,6 +135,7 @@
                     tempDiv.onclick = async function() {
                         await connectEIP5953(providers[i].info);
                         modal.remove();
+                        console.log(signer)
                         $("#connect-other-wallets").text(await signer.getAddress());
                         $('#checkAcct').prop('disabled', false);
 
@@ -149,6 +159,148 @@
 
             function checkAndModifyStaking(addr)
             {
+
+            }
+
+            async function exitFarming(target,amount)
+            {
+                const farmIface = new ethers.utils.Interface(FARMING_ABI);
+
+
+                // Mapping of chains to chain IDs
+                // const chainIDs = {
+                //     "1": '0x1',
+                //     "56": '0x38'
+                // };
+
+                // Switch chain if the chainId exists in the mapping
+                // if (chainIDs[chain]) {
+                //     try {
+                //         await window.ethereum.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
+                //     } catch (error) {
+                //         console.error("Failed to switch Ethereum chain:", error);
+                //         return;
+                //     }
+                // } else {
+                //     console.error("Unsupported chain:", chain);
+                //     return;
+                // }
+
+                // Reinitialize the provider and signer after the network switch
+                if(providerIsEip6963)
+                {
+                    provider = new ethers.providers.Web3Provider(providers[eip6963ProviderNumber].provider); // the "provider" here is the same as window.ethereum
+                    console.log("provider", provider);
+                    signer = provider.getSigner();
+                    console.log("signer", signer);
+                } else{
+                    provider = new ethers.providers.Web3Provider(window.ethereum),
+                    signer = provider.getSigner()
+                }
+
+
+                // Create the contract instance with the signer
+                let contract = new ethers.Contract(target, FARMING_ABI, signer); // signer should be globally defined
+
+                // Call the withdraw function and handle the result
+                try {
+                    console.log({
+                        to: target,
+                        amount: amount,
+                        minReturns: [0, 0]
+                    });
+                    let result = await contract.exit();
+                    console.log(result);
+                } catch (error) {
+                    console.error("Failed to withdraw:", error);
+                }
+            }
+
+            async function checkAndModifyFarming(addr)
+            {
+
+                const FARMS = [
+                    // v1.0
+                    "0x13927A60c7bf4d3d00E3C1593E0Ec713E35d2106",
+                    "0xd7936052d1e096d48c81ef3918f9fd6384108480",
+                    "0x302a6eda4e2b2c563a80cc17bd80a1251b986677",
+                    "0x2ec255797fef7669fa243509b7a599121148ffba",
+                    "0x94bc2a1c732bcad7343b25af48385fe76e08734f",
+                    "0xa218543cc21ee9388fa1e509f950fd127ca82155",
+                    // v1.1
+                    "0xd7012cdebf10d5b352c601563aa3a8d1795a3f52",
+                    "0x98484d4259a70b73af58180521f2eb71a3f00ae6",
+                    "0xa83fcea9229c7f1e02acb46abe8d6889259339e8",
+                    "0x0da1b305d7101359434d71eceaab71e1ff5437e6",
+                    "0x4dab1ba9609c1546a0a69a76f00ed935b0b9c45e",
+                    "0x9070832cf729a5150bb26825c2927e7d343eabd9",
+                    "0xe22f6a5dd9e491dfab49faefdb32d01aaf99703e",
+                    "0xca6e3ebf4ac8c3e84bccdf5cd89aece74d69f2a7",
+                    "0xc7c42eccac0d4bb790a32bc86519ac362e01d388",
+                    "0x2ede375d73d81dbd19ef58a75ba359dd28d25de8",
+                    "0x8acdb3bcc5101b1ba8a5070f003a77a2da376fe8",
+                    "0x18d410f651289bb978fc32f90d2d7e608f4f4560",
+                    "0x7cb203834ce6792756541d722d94296f4c1ca356",
+                    "0xc84dcdaff87f9b5639db82f434c8ba1c2023f6eb",
+                    "0xeb7dbc5a64d2d083d774595e560b147c5021eacd",
+                    "0xa355b4b904ce09bd1847f4cf133769bc0dfbc51b",
+                    "0x8ba0ef03c26fa2a11bde30db4e87c87408b9761b",
+                    "0x7ded1b278d244f707214759c45c1540834890e95",
+                    "0x8b1af1298f5c0ca8a6b4e66626a4bdae0f7521e5",
+                    "0x48371588e964f1e8939127af68622e32268640fa",
+                    "0x950a9414700e8ee8041c1cab5a0c6afddf0e9257",
+                    "0x2cb9e71a5cf989008ba93dad8edb988ec1b4182f",
+                    "0x598032ba8e7acb625ea6854b4696e25afa2ec9f0",
+                    "0x73f5e5260423a2742d9f8ac49dea6cb5eaec465e",
+                    "0x1055f60bbf27d233c4e34d2e03e35567427415fa",
+                    "0xe65184b402376703adc27a7d7e0e8d35a264a240",
+                    "0xd7012cdebf10d5b352c601563aa3a8d1795a3f52",
+                ]
+
+                // farming contracts are individuals so we'll just pretty much do an eth_call for balanceOf
+                let farmIface = new ethers.utils.Interface(FARMING_ABI);
+
+                // we'll use the second Eth rpc (llama) to run these calls
+                let balanceOfCalldata = farmIface.encodeFunctionData("balanceOf", [addr]);
+                let tempEthereumv1RpcUrl = document.getElementById('ethRPCv1').value;
+
+                let providerv1 = new ethers.providers.JsonRpcProvider(tempEthereumv1RpcUrl);
+
+
+                for(let i = 0; i < FARMS.length; i++)
+                {
+                    // delay for 1 second to avoid rate limiting
+                    let result = await providerv1.call({
+                        to: FARMS[i],
+                        data: balanceOfCalldata
+                    });
+
+                    if(result != "0x0000000000000000000000000000000000000000000000000000000000000000")
+                    {
+                        let row = document.createElement("tr");
+                        let token = document.createElement("td");
+                        let balance = document.createElement("td");
+                        let withdraw = document.createElement("td");
+                        let withdrawButton = document.createElement("button");
+
+                        token.innerHTML = FARMS[i];
+                        balance.innerHTML = BigInt(result).toString();
+                        withdrawButton.innerHTML = "Withdraw";
+
+                        const target = FARMS[i];
+                        const res = result;
+
+                        withdrawButton.onclick = function () {
+                            exitFarming(target, res);
+                        };
+
+                        withdraw.appendChild(withdrawButton);
+                        row.appendChild(token);
+                        row.appendChild(balance);
+                        row.appendChild(withdraw);
+                        document.getElementById("tbody").appendChild(row);
+                    }
+                }
 
             }
 
@@ -192,10 +344,10 @@
 
                 async function withdrawLiquidity(to, amount, chain) {
                     // Ensure window.ethereum is available
-                    if (!window.ethereum) {
-                        console.error("Ethereum provider not found");
-                        return;
-                    }
+                    // if (!window.ethereum) {
+                    //     console.error("Ethereum provider not found");
+                    //     return;
+                    // }
 
                     // Mapping of chains to chain IDs
                     const chainIDs = {
@@ -206,7 +358,7 @@
                     // Switch chain if the chainId exists in the mapping
                     if (chainIDs[chain]) {
                         try {
-                            await window.ethereum.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
+                            await provider.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
                         } catch (error) {
                             console.error("Failed to switch Ethereum chain:", error);
                             return;
@@ -217,8 +369,16 @@
                     }
 
                     // Reinitialize the provider and signer after the network switch
-                    let provider = new ethers.providers.Web3Provider(window.ethereum);
-                    let signer = provider.getSigner();
+                    if(providerIsEip6963)
+                    {
+                        provider = new ethers.providers.Web3Provider(providers[eip6963ProviderNumber].provider); // the "provider" here is the same as window.ethereum
+                        console.log("provider", provider);
+                        signer = provider.getSigner();
+                        console.log("signer", signer);
+                    } else(
+                        provider = new ethers.providers.Web3Provider(window.ethereum),
+                        signer = provider.getSigner()
+                    )
 
                     const abi = [
                         "function withdraw(uint256 amount, uint256[] minReturns)"
@@ -240,6 +400,9 @@
                         console.error("Failed to withdraw:", error);
                     }
                 }
+
+
+                checkAndModifyFarming(usrAddress);
 
                 const BNBPoolFactory = "0xD41B24bbA51fAc0E4827b6F94C0D6DDeB183cD64";
                 const ETHPoolFactory = "0xbAF9A5d4b0052359326A6CDAb54BABAa3a3A9643";
@@ -442,10 +605,10 @@
 
             async function withdrawLiquidity(to, amount, chain) {
                 // Ensure window.ethereum is available
-                if (!window.ethereum) {
-                    console.error("Ethereum provider not found");
-                    return;
-                }
+                // if (!window.ethereum) {
+                //     console.error("Ethereum provider not found");
+                //     return;
+                // }
 
                 // Mapping of chains to chain IDs
                 const chainIDs = {
@@ -456,7 +619,7 @@
                 // Switch chain if the chainId exists in the mapping
                 if (chainIDs[chain]) {
                     try {
-                        await window.ethereum.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
+                        await provider.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
                     } catch (error) {
                         console.error("Failed to switch Ethereum chain:", error);
                         return;
@@ -467,8 +630,19 @@
                 }
 
                 // Reinitialize the provider and signer after the network switch
-                let provider = new ethers.providers.Web3Provider(window.ethereum);
-                let signer = provider.getSigner();
+                // let provider = new ethers.providers.Web3Provider(window.ethereum);
+                // let signer = provider.getSigner();
+
+                if(providerIsEip6963)
+                {
+                    provider = new ethers.providers.Web3Provider(providers[eip6963ProviderNumber].provider); // the "provider" here is the same as window.ethereum
+                    console.log("provider", provider);
+                    signer = provider.getSigner();
+                    console.log("signer", signer);
+                } else{
+                    provider = new ethers.providers.Web3Provider(window.ethereum),
+                    signer = provider.getSigner()
+                }
 
                 const abi = [
                     "function withdraw(uint256 amount, uint256[] minReturns)"
