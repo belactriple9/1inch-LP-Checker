@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script type="module">
+        const FARMING_ABI = [{"inputs":[{"internalType":"contract Mooniswap","name":"_mooniswap","type":"address"},{"internalType":"contract IERC20","name":"_gift","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"decayPeriod","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"DecayPeriodVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"fee","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"FeeVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardPaid","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"slippageFee","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SlippageFeeVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Staked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},{"inputs":[],"name":"DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decayPeriod","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"decayPeriodVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"decayPeriodVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"discardDecayPeriodVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"discardFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"discardSlippageFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"earned","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"exit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"feeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"feeVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getReward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"gift","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastTimeRewardApplicable","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastUpdateTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mooniswap","outputs":[{"internalType":"contract Mooniswap","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mooniswapFactoryGovernance","outputs":[{"internalType":"contract IMooniswapFactoryGovernance","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"reward","type":"uint256"}],"name":"notifyRewardAmount","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"periodFinish","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"rewardDistribution","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerTokenStored","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardRate","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"rewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_rewardDistribution","type":"address"}],"name":"setRewardDistribution","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"slippageFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"slippageFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"slippageFeeVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"stake","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userRewardPerTokenPaid","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+
+        const providers = [];
+        let providerIsEip6963 = false;
+        let providerEip6963Info;
+        let provider;
+        let eip6963ProviderNumber;
+        let signer;
+        let userAddress;
+
+        window.addEventListener("eip6963:announceProvider", (event) => {
+            providers.push(event.detail);
+        });
+
+        window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+        async function connectEIP6963(info) {
+            for (let i = 0; i < providers.length; i++) {
+                if (providers[i].info.name === info.name) {
+                    provider = new ethers.providers.Web3Provider(providers[i].provider);
+                    signer = provider.getSigner();
+                    eip6963ProviderNumber = i;
+                    userAddress = await provider.send("eth_requestAccounts", []);
+                    console.log('Connected address:', userAddress[0]);
+                    break;
+                }
+            }
+        }
+
+        function processMulticallResults(result, batch, chainId) {
+            for (let k = 0; k < result[1].length; k++) {
+                if (result[1][k] !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+                    let row = document.createElement("tr");
+                    let token = document.createElement("td");
+                    let balance = document.createElement("td");
+                    let withdraw = document.createElement("td");
+                    let withdrawButton = document.createElement("button");
+
+                    token.textContent = batch[k].target;
+                    balance.textContent = BigInt(result[1][k]).toString();
+                    withdrawButton.textContent = "Withdraw";
+
+                    const target = batch[k].target;
+                    const res = result[1][k];
+
+                    withdrawButton.onclick = function () {
+                        withdrawLiquidity(target, res, chainId);
+                    };
+
+                    withdraw.appendChild(withdrawButton);
+                    row.appendChild(token);
+                    row.appendChild(balance);
+                    row.appendChild(withdraw);
+                    document.getElementById("tbody").appendChild(row);
+                }
+            }
+        }
+
+        async function withdrawLiquidity(to, amount, chain) {
+            const chainIDs = {
+                "1": '0x1',
+                "56": '0x38'
+            };
+
+            if (chainIDs[chain]) {
+                try {
+                    await provider.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
+                } catch (error) {
+                    console.error("Failed to switch Ethereum chain:", error);
+                    return;
+                }
+            } else {
+                console.error("Unsupported chain:", chain);
+                return;
+            }
+
+            const abi = [
+                "function withdraw(uint256 amount, uint256[] minReturns)"
+            ];
+
+            let contract = new ethers.Contract(to, abi, signer);
+
+            try {
+                let result = await contract.withdraw(amount, [0, 0]);
+                console.log('Withdrawal result:', result);
+            } catch (error) {
+                console.error("Failed to withdraw:", error);
+            }
+        }
+
+        $(document).ready(() => {
+            $('#checkAcct').prop('disabled', true);
+
+            $('#connect-wallet').on('click', async function (e) {
+                e.preventDefault();
+                providerIsEip6963 = false;
+
+                if (!window.ethereum) {
+                    alert("Please install MetaMask to use this dApp!");
+                    return;
+                }
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                const address = await signer.getAddress();
+
+                if (address) {
+                    console.log('Connected address:', address);
+                    $('#connect-wallet').text(address);
+                    $('#checkAcct').prop('disabled', false);
+                }
+            });
+
+            $('#connect-other-wallets').on('click', async function (e) {
+                e.preventDefault();
+                providerIsEip6963 = true;
+
+                let modal = document.createElement("div");
+                modal.id = "modal";
+                modal.style.position = "fixed";
+                modal.style.top = "50%";
+                modal.style.left = "50%";
+                modal.style.transform = "translate(-50%, -50%)";
+                modal.style.width = "100%";
+                modal.style.maxWidth = "400px";
+                modal.style.border = "1px solid black";
+                modal.style.borderRadius = "5px";
+                modal.style.background = "white";
+                modal.style.zIndex = "1000";
+                modal.style.padding = "20px";
+
+                providers.forEach((providerItem, i) => {
+                    let tempDiv = document.createElement("div");
+                    tempDiv.style.display = "flex";
+                    tempDiv.style.alignItems = "center";
+                    tempDiv.style.padding = "10px";
+                    tempDiv.style.cursor = "pointer";
+                    tempDiv.style.borderBottom = "1px solid #ccc";
+
+                    let tempImg = document.createElement("img");
+                    tempImg.src = providerItem.info.icon;
+                    tempImg.style.width = "25px";
+                    tempImg.style.height = "25px";
+
+                    let tempName = document.createElement("p");
+                    tempName.textContent = providerItem.info.name;
+                    tempName.style.marginLeft = "10px";
+
+                    tempDiv.appendChild(tempImg);
+                    tempDiv.appendChild(tempName);
+
+                    tempDiv.onclick = async function () {
+                        await connectEIP6963(providerItem.info);
+                        modal.remove();
+                        $("#connect-other-wallets").text("Disconnect");
+                        $('#checkAcct').prop('disabled', false);
+                    };
+
+                    modal.appendChild(tempDiv);
+                });
+
+                let closeButton = document.createElement("button");
+                closeButton.textContent = "Close";
+                closeButton.onclick = function () {
+                    modal.remove();
+                };
+                modal.appendChild(closeButton);
+
+                document.body.appendChild(modal);
+            });
+
+            $('#checkAcct').on('click', async function (e) {
+                e.preventDefault();
+                $('#loadingModal').show();
+
+                let usrAddress;
+                if (providerIsEip6963) {
+                    usrAddress = userAddress[0];
+                } else {
+                    usrAddress = await signer.getAddress();
+                }
+
+                // Implement your functions here
+                checkAndModifyStaking(usrAddress);
+                checkAndModifyFarming(usrAddress);
+                // Other logic...
+
+                $('#loadingModal').hide();
+            });
+        });
+
+        // Additional functions (checkAndModifyStaking, checkAndModifyFarming, etc.)
+        // should be defined below, ensuring they are properly scoped and functional.
+
+    </script>
+</head>
+<body>
+    <pre>
+***************************************************************************
+This should help you withdraw liquidity from the 1inch liquidity protocol. 
+Simply connect your wallet and the system will list all your LP tokens. 
+Click the withdraw button to initiate a transaction. 
+
+Click "Connect wallet" to connect to your browser extension wallet. Otherwise use "Use Walletconnect" to connect to your mobile wallet. 
+***************************************************************************
+    </pre>
+
+    <button id="connect-wallet">Connect Wallet</button>
+    <button id="connect-other-wallets">Other Wallets</button>
+    <button id="checkAcct" disabled>Check For Liquidity</button>
+    <hr>
+    <pre>
+***************************************************************************
+This is where you can enter custom RPC information. Leave blank to use default RPCs.
+There are 2 Ethereum RPCs to handle load balancing.
+***************************************************************************
+    </pre>
+
+    <label for="ethRPC">Ethereum RPC</label>
+    <input type="text" id="ethRPC" name="ethRPC" value="https://cloudflare-eth.com">
+    <br>
+    <label for="ethRPCv1">Ethereum RPC v1</label>
+    <input type="text" id="ethRPCv1" name="ethRPCv1" value="https://rpc.ankr.com/eth">
+    <br>
+    <label for="bnbRPC">Binance RPC</label>
+    <input type="text" id="bnbRPC" name="bnbRPC" value="https://bsc-dataseed.binance.org/">
+    <hr>
+
+    <div>
+        <div id="boxContainers">
+            <div id="container">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Balance</th>
+                            <th>Withdraw</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingModal" class="modal">
+        <div class="modal-content">
+            <p>Please wait, still loading...</p>
+        </div>
+    </div>
+
+    <style>
+        #boxContainers {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</body>
+</html>
