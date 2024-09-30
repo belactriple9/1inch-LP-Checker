@@ -189,8 +189,18 @@
                 }
 
                 // Implement your functions here
-                checkAndModifyStaking(usrAddress);
-                checkAndModifyFarming(usrAddress);
+                try{
+                    checkAndModifyStaking(usrAddress);
+                } catch (e) 
+                {
+                    console.log("Failed to check staking - cannot modify balance")
+                }
+                try{
+                    checkAndModifyFarming(usrAddress);
+                } catch (e) 
+                {
+                    console.log("Failed to check farming - cannot modify balance")
+                }
                 // Other logic...
 
                 $('#loadingModal').hide();
