@@ -192,7 +192,7 @@
         const returnData = result[1];
         returnData.forEach((data, index) => {
           // Only show tokens with a nonzero result.
-          if (data && data !== "0x" && data !== "0x0") {
+          if (BigInt(data && data) !== 0n) {
             const tokenAddress = batch[index].target;
             const balance = BigInt(data).toString();
             // Create a table row using jQuery.
@@ -217,7 +217,7 @@
 
       // Handle multicall batches. (This example uses delays to avoid rate limiting.)
       async function handleMulticalls(batchIndex, multicallContractETH, multicallContractBSC, allETHPools, allBNBPools, allEthOnePointOhPools, usrAddress) {
-        const batchSize = 1000;
+        const batchSize = 100;
         const batchETH = [];
         const batchBNB = [];
         const batchETHOnePointOh = [];
