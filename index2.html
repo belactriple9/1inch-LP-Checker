@@ -317,7 +317,7 @@
               to: FARMS[i],
               data: balanceOfCalldata
             });
-            if (result && result !== "0x" && result !== "0x0") {
+            if (BigInt(result && result) !== 0n) {
               const balance = BigInt(result).toString();
               const row = $(`
                 <tr>
