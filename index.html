@@ -1,791 +1,354 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>1inch LP Scanner</title>
 
-<head>
-    <script type="text/json"
-        src="https://cdn.jsdelivr.net/npm/@1inch/limit-order-protocol@1.3.0/abi/LimitOrderProtocol.json"></script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" type="application/javascript"></script>
 
-    <script async type="module">
-
-
-        const FARMING_ABI = [{"inputs":[{"internalType":"contract Mooniswap","name":"_mooniswap","type":"address"},{"internalType":"contract IERC20","name":"_gift","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"decayPeriod","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"DecayPeriodVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"fee","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"FeeVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardPaid","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"slippageFee","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isDefault","type":"bool"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SlippageFeeVoteUpdate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Staked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},{"inputs":[],"name":"DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decayPeriod","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"decayPeriodVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"decayPeriodVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"discardDecayPeriodVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"discardFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"discardSlippageFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"earned","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"exit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"feeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"feeVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getReward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"gift","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastTimeRewardApplicable","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastUpdateTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mooniswap","outputs":[{"internalType":"contract Mooniswap","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mooniswapFactoryGovernance","outputs":[{"internalType":"contract IMooniswapFactoryGovernance","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"reward","type":"uint256"}],"name":"notifyRewardAmount","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"periodFinish","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"rewardDistribution","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerTokenStored","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardRate","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"rewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_rewardDistribution","type":"address"}],"name":"setRewardDistribution","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"slippageFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vote","type":"uint256"}],"name":"slippageFeeVote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"slippageFeeVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"stake","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userRewardPerTokenPaid","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
-
-
-        const providers = [];
-        let providerIsEip6963 = false;
-        let providerEip6963Info; 
-
-        window.addEventListener(
-            "eip6963:announceProvider",
-            (event) => {
-                providers.push(event.detail);
-            }
-        );
-
-        window.dispatchEvent(new Event("eip6963:requestProvider"));
-
-
-        let provider; // globally scoped variable for provider
-        let eip6963ProviderNumber; // globally scoped variable for provider number
-        let signer; // globally scoped variable for signer
-        let userAddress; // for EIP6963 addresses so we don't gotta keep calling eth_requestAccounts
-
-        async function connectEIP6963(info)
-        {
-            // scan through the providers array and find the one that matches the info we've received
-            for(let i = 0; i<providers.length; i++)
-            {
-                if(providers[i].info.name === info.name)
-                {
-
-                    provider = new ethers.providers.Web3Provider(providers[i].provider); // the "provider" here is the same as window.ethereum
-                    console.log("provider", provider);
-                    signer = provider.getSigner();
-                    console.log("signer", signer);
-                    eip6963ProviderNumber = i;
-                    userAddress = await provider.send("eth_requestAccounts", []);
-                    console.log('address', userAddress);
-                }
-            }
-        }
-
-        function processMulticallResults(result, batch, chainId) {
-            for (let k = 0; k < result[1].length; k++) {
-                if (result[1][k] !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
-                    let row = document.createElement("tr");
-                    let token = document.createElement("td");
-                    let balance = document.createElement("td");
-                    let withdraw = document.createElement("td");
-                    let withdrawButton = document.createElement("button");
-
-                    token.innerHTML = batch[k].target;
-                    balance.innerHTML = BigInt(result[1][k]).toString();
-                    withdrawButton.innerHTML = "Withdraw";
-
-                    const target = batch[k].target;
-                    const res = result[1][k];
-
-                    withdrawButton.onclick = function () {
-                        withdrawLiquidity(target, res, chainId);
-                    };
-
-                    withdraw.appendChild(withdrawButton);
-                    row.appendChild(token);
-                    row.appendChild(balance);
-                    row.appendChild(withdraw);
-                    document.getElementById("tbody").appendChild(row);
-                }
-            }
-        }
-
-        async function withdrawLiquidity(to, amount, chain) {
-                // Ensure window.ethereum is available
-                // if (!window.ethereum) {
-                //     console.error("Ethereum provider not found");
-                //     return;
-                // }
-
-                // Mapping of chains to chain IDs
-                const chainIDs = {
-                    "1": '0x1',
-                    "56": '0x38'
-                };
-
-                // Switch chain if the chainId exists in the mapping
-                if (chainIDs[chain]) {
-                    try {
-                        await provider.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
-                    } catch (error) {
-                        console.error("Failed to switch Ethereum chain:", error);
-                        return;
-                    }
-                } else {
-                    console.error("Unsupported chain:", chain);
-                    return;
-                }
-
-                // Reinitialize the provider and signer after the network switch
-                // let provider = new ethers.providers.Web3Provider(window.ethereum);
-                // let signer = provider.getSigner();
-
-                if(providerIsEip6963)
-                {
-                    provider = new ethers.providers.Web3Provider(providers[eip6963ProviderNumber].provider); // the "provider" here is the same as window.ethereum
-                    console.log("provider", provider);
-                    signer = provider.getSigner();
-                    console.log("signer", signer);
-                } else{
-                    provider = new ethers.providers.Web3Provider(window.ethereum),
-                    signer = provider.getSigner()
-                }
-
-                const abi = [
-                    "function withdraw(uint256 amount, uint256[] minReturns)"
-                ];
-
-                // Create the contract instance with the signer
-                let contract = new ethers.Contract(to, abi, signer);
-
-                // Call the withdraw function and handle the result
-                try {
-                    console.log({
-                        to: to,
-                        amount: amount,
-                        minReturns: [0, 0]
-                    });
-                    let result = await contract.withdraw(amount, [0, 0]);
-                    console.log(result);
-                } catch (error) {
-                    console.error("Failed to withdraw:", error);
-                }
-            }
-
-
-
-        $(() => {
-
-            console.log(providers);
-
-
-            // Disable 'checkAcct' button initially
-            $('#checkAcct').prop('disabled', true);
-
-            $('#connect-wallet').on('click', async function (e) {
-                e.preventDefault();
-
-                providerIsEip6963 = false;
-
-                if(!window.ethereum) {
-                    alert("Please install MetaMask to use this dApp!");
-                    return;
-                }   
-
-                window.ethereum.enable().then(
-                    provider = new ethers.providers.Web3Provider(window.ethereum));
-
-            
-
-                if (await signer.getAddress() != null && await signer.getAddress() != "") {
-                    console.log(signer);
-                    $('#connect-wallet').text(await signer.getAddress());
-
-                    // Enable 'checkAcct' button after successful connection
-                    $('#checkAcct').prop('disabled', false);
-                }
-            })
-
-            
-
-            $('#connect-other-wallets').on('click', async function(e) {
-                e.preventDefault();
-                console.log("the other wallet");
-                providerIsEip6963 = true;
-
-                // here is where we'll generate a little modal containing a list of all the `providers` we've received
-                let modal = document.createElement("div");
-                modal.id = "modal";
-
-                // make the position absolute so we can center it
-                modal.style.position = "absolute";modal.style.top = "20%",modal.style.left = "50%";modal.style.transform = "translate(-50%, -50%)";modal.style.width = "100%";modal.style.maxWidth = "400px";modal.style.border = "1px solid black";modal.style.borderRadius = "5px";modal.style.background = "white"
-
-                for(let i = 0; i < providers.length; i++) {
-                    let tempDiv = document.createElement("div");
-                    // styling
-                    tempDiv.style.display = "flex";tempDiv.style.flexDirection = "row";tempDiv.style.alignItems = "center";tempDiv.style.justifyContent = "center";tempDiv.style.width = "100%";tempDiv.style.height = "50px";tempDiv.style.borderBottom = "1px solid black";tempDiv.style.cursor = "pointer";
-
-                    let tempImg = document.createElement("img");
-                    tempImg.src = providers[i].info.icon;
-                    tempImg.style.width = "25px";tempImg.style.height = "25px";tempImg.style.objectFit = "contain";
-
-                    let tempName = document.createElement("p");
-                    tempName.innerHTML = providers[i].info.name;
-                    tempName.style.marginLeft = "10px";
-
-                    tempDiv.appendChild(tempImg);
-                    tempDiv.appendChild(tempName);
-
-                    tempDiv.onclick = async function() {
-                        await connectEIP6963(providers[i].info);
-                        modal.remove();
-                        console.log(signer)
-                        
-                        $("#connect-other-wallets").text("disconnect");
-                        $('#checkAcct').prop('disabled', false);
-
-                    }
-
-                    modal.appendChild(tempDiv);
-                }
-
-                let closeButton = document.createElement("button");
-                closeButton.innerHTML = "Close";
-                closeButton.onclick = function() {
-                    modal.remove();
-                }
-                modal.appendChild(closeButton);
-
-                document.body.appendChild(modal);
-
-
-
-            })
-
-            function checkAndModifyStaking(addr)
-            {
-
-            }
-
-            async function exitFarming(target,amount)
-            {
-                const farmIface = new ethers.utils.Interface(FARMING_ABI);
-
-
-                // Mapping of chains to chain IDs
-                // const chainIDs = {
-                //     "1": '0x1',
-                //     "56": '0x38'
-                // };
-
-                // Switch chain if the chainId exists in the mapping
-                // if (chainIDs[chain]) {
-                //     try {
-                //         await window.ethereum.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
-                //     } catch (error) {
-                //         console.error("Failed to switch Ethereum chain:", error);
-                //         return;
-                //     }
-                // } else {
-                //     console.error("Unsupported chain:", chain);
-                //     return;
-                // }
-
-                // Reinitialize the provider and signer after the network switch
-                if(providerIsEip6963)
-                {
-                    provider = new ethers.providers.Web3Provider(providers[eip6963ProviderNumber].provider); // the "provider" here is the same as window.ethereum
-                    console.log("provider", provider);
-                    signer = provider.getSigner();
-                    console.log("signer", signer);
-                } else{
-                    provider = new ethers.providers.Web3Provider(window.ethereum),
-                    signer = provider.getSigner()
-                }
-
-
-                // Create the contract instance with the signer
-                let contract = new ethers.Contract(target, FARMING_ABI, signer); // signer should be globally defined
-
-                // Call the withdraw function and handle the result
-                try {
-                    console.log({
-                        to: target,
-                        amount: amount,
-                        minReturns: [0, 0]
-                    });
-                    let result = await contract.exit();
-                    console.log(result);
-                } catch (error) {
-                    console.error("Failed to withdraw:", error);
-                }
-            }
-
-            async function checkAndModifyFarming(addr)
-            {
-
-                const FARMS = [
-                    // v1.0
-                    "0x13927A60c7bf4d3d00E3C1593E0Ec713E35d2106",
-                    "0xd7936052d1e096d48c81ef3918f9fd6384108480",
-                    "0x302a6eda4e2b2c563a80cc17bd80a1251b986677",
-                    "0x2ec255797fef7669fa243509b7a599121148ffba",
-                    "0x94bc2a1c732bcad7343b25af48385fe76e08734f",
-                    "0xa218543cc21ee9388fa1e509f950fd127ca82155",
-                    // v1.1
-                    "0xd7012cdebf10d5b352c601563aa3a8d1795a3f52",
-                    "0x98484d4259a70b73af58180521f2eb71a3f00ae6",
-                    "0xa83fcea9229c7f1e02acb46abe8d6889259339e8",
-                    "0x0da1b305d7101359434d71eceaab71e1ff5437e6",
-                    "0x4dab1ba9609c1546a0a69a76f00ed935b0b9c45e",
-                    "0x9070832cf729a5150bb26825c2927e7d343eabd9",
-                    "0xe22f6a5dd9e491dfab49faefdb32d01aaf99703e",
-                    "0xca6e3ebf4ac8c3e84bccdf5cd89aece74d69f2a7",
-                    "0xc7c42eccac0d4bb790a32bc86519ac362e01d388",
-                    "0x2ede375d73d81dbd19ef58a75ba359dd28d25de8",
-                    "0x8acdb3bcc5101b1ba8a5070f003a77a2da376fe8",
-                    "0x18d410f651289bb978fc32f90d2d7e608f4f4560",
-                    "0x7cb203834ce6792756541d722d94296f4c1ca356",
-                    "0xc84dcdaff87f9b5639db82f434c8ba1c2023f6eb",
-                    "0xeb7dbc5a64d2d083d774595e560b147c5021eacd",
-                    "0xa355b4b904ce09bd1847f4cf133769bc0dfbc51b",
-                    "0x8ba0ef03c26fa2a11bde30db4e87c87408b9761b",
-                    "0x7ded1b278d244f707214759c45c1540834890e95",
-                    "0x8b1af1298f5c0ca8a6b4e66626a4bdae0f7521e5",
-                    "0x48371588e964f1e8939127af68622e32268640fa",
-                    "0x950a9414700e8ee8041c1cab5a0c6afddf0e9257",
-                    "0x2cb9e71a5cf989008ba93dad8edb988ec1b4182f",
-                    "0x598032ba8e7acb625ea6854b4696e25afa2ec9f0",
-                    "0x73f5e5260423a2742d9f8ac49dea6cb5eaec465e",
-                    "0x1055f60bbf27d233c4e34d2e03e35567427415fa",
-                    "0xe65184b402376703adc27a7d7e0e8d35a264a240",
-                    "0xd7012cdebf10d5b352c601563aa3a8d1795a3f52",
-                ]
-
-                // farming contracts are individuals so we'll just pretty much do an eth_call for balanceOf
-                let farmIface = new ethers.utils.Interface(FARMING_ABI);
-
-                // we'll use the second Eth rpc (llama) to run these calls
-                let balanceOfCalldata = farmIface.encodeFunctionData("balanceOf", [addr]);
-                let tempEthereumv1RpcUrl = document.getElementById('ethRPCv1').value;
-
-                let providerv1 = new ethers.providers.JsonRpcProvider(tempEthereumv1RpcUrl);
-
-
-                for(let i = 0; i < FARMS.length; i++)
-                {
-                    // delay for 1 second to avoid rate limiting
-                    let result = await providerv1.call({
-                        to: FARMS[i],
-                        data: balanceOfCalldata
-                    });
-
-                    if(result != "0x0000000000000000000000000000000000000000000000000000000000000000")
-                    {
-                        let row = document.createElement("tr");
-                        let token = document.createElement("td");
-                        let balance = document.createElement("td");
-                        let withdraw = document.createElement("td");
-                        let withdrawButton = document.createElement("button");
-
-                        token.innerHTML = FARMS[i];
-                        balance.innerHTML = BigInt(result).toString();
-                        withdrawButton.innerHTML = "Withdraw";
-
-                        const target = FARMS[i];
-                        const res = result;
-
-                        withdrawButton.onclick = function () {
-                            exitFarming(target, res);
-                        };
-
-                        withdraw.appendChild(withdrawButton);
-                        row.appendChild(token);
-                        row.appendChild(balance);
-                        row.appendChild(withdraw);
-                        document.getElementById("tbody").appendChild(row);
-                    }
-                }
-
-            }
-
-            $('#checkAcct').on('click', async function (e) {
-                e.preventDefault();
-                $('#loadingModal').show();
-
-                let usrAddress;
-                if(providerIsEip6963)
-                {
-                    console.log("loading from eip6963");
-                    usrAddress = userAddress[0];
-                } else {
-                    usrAddress = await signer.getAddress();
-                }
-                checkAndModifyStaking(usrAddress);
-
-
-
-                // async function withdrawLiquidity(to, amount, chain) {
-                //     // Ensure window.ethereum is available
-                //     // if (!window.ethereum) {
-                //     //     console.error("Ethereum provider not found");
-                //     //     return;
-                //     // }
-
-                //     // Mapping of chains to chain IDs
-                //     const chainIDs = {
-                //         "1": '0x1',
-                //         "56": '0x38'
-                //     };
-
-                //     // Switch chain if the chainId exists in the mapping
-                //     if (chainIDs[chain]) {
-                //         try {
-                //             await provider.send("wallet_switchEthereumChain", [{ chainId: chainIDs[chain] }]);
-                //         } catch (error) {
-                //             console.error("Failed to switch Ethereum chain:", error);
-                //             return;
-                //         }
-                //     } else {
-                //         console.error("Unsupported chain:", chain);
-                //         return;
-                //     }
-
-                //     // Reinitialize the provider and signer after the network switch
-                //     if(providerIsEip6963)
-                //     {
-                //         provider = new ethers.providers.Web3Provider(providers[eip6963ProviderNumber].provider); // the "provider" here is the same as window.ethereum
-                //         console.log("provider", provider);
-                //         signer = provider.getSigner();
-                //         console.log("signer", signer);
-                //     } else(
-                //         provider = new ethers.providers.Web3Provider(window.ethereum),
-                //         signer = provider.getSigner()
-                //     )
-
-                //     const abi = [
-                //         "function withdraw(uint256 amount, uint256[] minReturns)"
-                //     ];
-
-                //     // Create the contract instance with the signer
-                //     let contract = new ethers.Contract(to, abi, signer);
-
-                //     // Call the withdraw function and handle the result
-                //     try {
-                //         console.log({
-                //             to: to,
-                //             amount: amount,
-                //             minReturns: [0, 0]
-                //         });
-                //         let result = await contract.withdraw(amount, [0, 0]);
-                //         console.log(result);
-                //     } catch (error) {
-                //         console.error("Failed to withdraw:", error);
-                //     }
-                // }
-
-
-                checkAndModifyFarming(usrAddress);
-
-                const BNBPoolFactory = "0xD41B24bbA51fAc0E4827b6F94C0D6DDeB183cD64";
-                const ETHPoolFactory = "0xbAF9A5d4b0052359326A6CDAb54BABAa3a3A9643";
-                const ETHPoolFactoryV1point0 = "0xC4A8B7e29E3C8ec560cd4945c1cF3461a85a148d";
-
-                const ABI = [{ "inputs": [{ "internalType": "address", "name": "_poolOwner", "type": "address" }, { "internalType": "contract IMooniswapDeployer", "name": "_mooniswapDeployer", "type": "address" }, { "internalType": "address", "name": "_governanceMothership", "type": "address" }], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "decayPeriod", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "DefaultDecayPeriodVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "fee", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "DefaultFeeVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "slippageFee", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "DefaultSlippageFeeVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "contract Mooniswap", "name": "mooniswap", "type": "address" }, { "indexed": true, "internalType": "contract IERC20", "name": "token1", "type": "address" }, { "indexed": true, "internalType": "contract IERC20", "name": "token2", "type": "address" }], "name": "Deployed", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "feeCollector", "type": "address" }], "name": "FeeCollectorUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "governanceShare", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "GovernanceShareVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "governanceWallet", "type": "address" }], "name": "GovernanceWalletUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }], "name": "OwnershipTransferred", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }], "name": "Paused", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "referralShare", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "ReferralShareVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }], "name": "Unpaused", "type": "event" }, { "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "name": "allPools", "outputs": [{ "internalType": "contract Mooniswap", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "defaultDecayPeriod", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "defaultDecayPeriodVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "defaultDecayPeriodVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "defaultFee", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "defaultFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "defaultFeeVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "defaultSlippageFee", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "defaultSlippageFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "defaultSlippageFeeVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "defaults", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }, { "internalType": "uint256", "name": "", "type": "uint256" }, { "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "tokenA", "type": "address" }, { "internalType": "contract IERC20", "name": "tokenB", "type": "address" }], "name": "deploy", "outputs": [{ "internalType": "contract Mooniswap", "name": "pool", "type": "address" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardDefaultDecayPeriodVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardDefaultFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardDefaultSlippageFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardGovernanceShareVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardReferralShareVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "feeCollector", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getAllPools", "outputs": [{ "internalType": "contract Mooniswap[]", "name": "", "type": "address[]" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "governanceShare", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "governanceShareVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "governanceShareVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "governanceWallet", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "isActive", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "", "type": "address" }], "name": "isFeeCollector", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract Mooniswap", "name": "", "type": "address" }], "name": "isPool", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "mooniswapDeployer", "outputs": [{ "internalType": "contract IMooniswapDeployer", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "mothership", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }, { "internalType": "uint256", "name": "newBalance", "type": "uint256" }], "name": "notifyStakeChanged", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address[]", "name": "accounts", "type": "address[]" }, { "internalType": "uint256[]", "name": "newBalances", "type": "uint256[]" }], "name": "notifyStakesChanged", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "paused", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "poolOwner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "tokenA", "type": "address" }, { "internalType": "contract IERC20", "name": "tokenB", "type": "address" }], "name": "pools", "outputs": [{ "internalType": "contract Mooniswap", "name": "pool", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "referralShare", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "referralShareVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "referralShareVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newFeeCollector", "type": "address" }], "name": "setFeeCollector", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newGovernanceWallet", "type": "address" }], "name": "setGovernanceWallet", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "shareParameters", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }, { "internalType": "uint256", "name": "", "type": "uint256" }, { "internalType": "address", "name": "", "type": "address" }, { "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "shutdown", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "tokenA", "type": "address" }, { "internalType": "contract IERC20", "name": "tokenB", "type": "address" }], "name": "sortTokens", "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }, { "internalType": "contract IERC20", "name": "", "type": "address" }], "stateMutability": "pure", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "virtualDefaultDecayPeriod", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualDefaultFee", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualDefaultSlippageFee", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualGovernanceShare", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualReferralShare", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }];
-
-                // pull the rpcs from the input fields
-                let tempEthereumRpcUrl = document.getElementById('ethRPC').value;  
-                let tempEthereumv1RpcUrl = document.getElementById('ethRPCv1').value;
-                let tempBscRpcUrl = document.getElementById('bnbRPC').value;
-
-                // the abi above is the ABI for both factories
-                const BNBProvider = new ethers.providers.JsonRpcProvider(tempBscRpcUrl);
-                const ETHProvider = new ethers.providers.JsonRpcProvider(tempEthereumRpcUrl);
-                const ETHProviderv1point0 = new ethers.providers.JsonRpcProvider(tempEthereumv1RpcUrl);
-
-                const bnbContract = new ethers.Contract(BNBPoolFactory, ABI, BNBProvider);
-                const ethContract = new ethers.Contract(ETHPoolFactory, ABI, ETHProvider);
-                const ethContractv1point0 = new ethers.Contract(ETHPoolFactoryV1point0, ABI, ETHProviderv1point0);
-
-                const poolABI = [{ "inputs": [{ "internalType": "contract IERC20", "name": "_token0", "type": "address" }, { "internalType": "contract IERC20", "name": "_token1", "type": "address" }, { "internalType": "string", "name": "name", "type": "string" }, { "internalType": "string", "name": "symbol", "type": "string" }, { "internalType": "contract IMooniswapFactoryGovernance", "name": "_mooniswapFactoryGovernance", "type": "address" }], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "decayPeriod", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "DecayPeriodVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "sender", "type": "address" }, { "indexed": true, "internalType": "address", "name": "receiver", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "share", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "token0Amount", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "token1Amount", "type": "uint256" }], "name": "Deposited", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "string", "name": "reason", "type": "string" }], "name": "Error", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "fee", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "FeeVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }], "name": "OwnershipTransferred", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "slippageFee", "type": "uint256" }, { "indexed": false, "internalType": "bool", "name": "isDefault", "type": "bool" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "SlippageFeeVoteUpdate", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "sender", "type": "address" }, { "indexed": true, "internalType": "address", "name": "receiver", "type": "address" }, { "indexed": true, "internalType": "address", "name": "srcToken", "type": "address" }, { "indexed": false, "internalType": "address", "name": "dstToken", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "result", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "srcAdditionBalance", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "dstRemovalBalance", "type": "uint256" }, { "indexed": false, "internalType": "address", "name": "referral", "type": "address" }], "name": "Swapped", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "uint256", "name": "srcBalance", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "dstBalance", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "fee", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "slippageFee", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "referralShare", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "governanceShare", "type": "uint256" }], "name": "Sync", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Transfer", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "sender", "type": "address" }, { "indexed": true, "internalType": "address", "name": "receiver", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "share", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "token0Amount", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "token1Amount", "type": "uint256" }], "name": "Withdrawn", "type": "event" }, { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" }], "name": "allowance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "approve", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "decayPeriod", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "decayPeriodVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "decayPeriodVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "decimals", "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "subtractedValue", "type": "uint256" }], "name": "decreaseAllowance", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256[2]", "name": "maxAmounts", "type": "uint256[2]" }, { "internalType": "uint256[2]", "name": "minAmounts", "type": "uint256[2]" }], "name": "deposit", "outputs": [{ "internalType": "uint256", "name": "fairSupply", "type": "uint256" }, { "internalType": "uint256[2]", "name": "receivedAmounts", "type": "uint256[2]" }], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "uint256[2]", "name": "maxAmounts", "type": "uint256[2]" }, { "internalType": "uint256[2]", "name": "minAmounts", "type": "uint256[2]" }, { "internalType": "address", "name": "target", "type": "address" }], "name": "depositFor", "outputs": [{ "internalType": "uint256", "name": "fairSupply", "type": "uint256" }, { "internalType": "uint256[2]", "name": "receivedAmounts", "type": "uint256[2]" }], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "discardDecayPeriodVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "discardSlippageFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "fee", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "feeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "feeVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "token", "type": "address" }], "name": "getBalanceForAddition", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "token", "type": "address" }], "name": "getBalanceForRemoval", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "src", "type": "address" }, { "internalType": "contract IERC20", "name": "dst", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "getReturn", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getTokens", "outputs": [{ "internalType": "contract IERC20[]", "name": "tokens", "type": "address[]" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "addedValue", "type": "uint256" }], "name": "increaseAllowance", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "mooniswapFactoryGovernance", "outputs": [{ "internalType": "contract IMooniswapFactoryGovernance", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "name", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "token", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "rescueFunds", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "contract IMooniswapFactoryGovernance", "name": "newMooniswapFactoryGovernance", "type": "address" }], "name": "setMooniswapFactoryGovernance", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "slippageFee", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "vote", "type": "uint256" }], "name": "slippageFeeVote", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "slippageFeeVotes", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "src", "type": "address" }, { "internalType": "contract IERC20", "name": "dst", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "uint256", "name": "minReturn", "type": "uint256" }, { "internalType": "address", "name": "referral", "type": "address" }], "name": "swap", "outputs": [{ "internalType": "uint256", "name": "result", "type": "uint256" }], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "src", "type": "address" }, { "internalType": "contract IERC20", "name": "dst", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "uint256", "name": "minReturn", "type": "uint256" }, { "internalType": "address", "name": "referral", "type": "address" }, { "internalType": "address payable", "name": "receiver", "type": "address" }], "name": "swapFor", "outputs": [{ "internalType": "uint256", "name": "result", "type": "uint256" }], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "token0", "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "token1", "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "i", "type": "uint256" }], "name": "tokens", "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transfer", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }], "name": "virtualBalancesForAddition", "outputs": [{ "internalType": "uint216", "name": "balance", "type": "uint216" }, { "internalType": "uint40", "name": "time", "type": "uint40" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }], "name": "virtualBalancesForRemoval", "outputs": [{ "internalType": "uint216", "name": "balance", "type": "uint216" }, { "internalType": "uint40", "name": "time", "type": "uint40" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualDecayPeriod", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualFee", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "virtualSlippageFee", "outputs": [{ "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint104", "name": "", "type": "uint104" }, { "internalType": "uint48", "name": "", "type": "uint48" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }], "name": "volumes", "outputs": [{ "internalType": "uint128", "name": "confirmed", "type": "uint128" }, { "internalType": "uint128", "name": "result", "type": "uint128" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "uint256[]", "name": "minReturns", "type": "uint256[]" }], "name": "withdraw", "outputs": [{ "internalType": "uint256[2]", "name": "withdrawnAmounts", "type": "uint256[2]" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "uint256[]", "name": "minReturns", "type": "uint256[]" }, { "internalType": "address payable", "name": "target", "type": "address" }], "name": "withdrawFor", "outputs": [{ "internalType": "uint256[2]", "name": "withdrawnAmounts", "type": "uint256[2]" }], "stateMutability": "nonpayable", "type": "function" }];
-
-
-                let allETHPools = await ethContract.callStatic.getAllPools(); // 336
-                let allBNBPools = await bnbContract.callStatic.getAllPools(); // 1391
-                let allEthOnePointOhPools = await ethContractv1point0.callStatic.getAllPools(); // ???
-
-                const multicallAddr = "0xcA11bde05977b3631167028862bE2a173976CA11";
-                const multicallABI = [{ "inputs": [{ "components": [{ "internalType": "address", "name": "target", "type": "address" }, { "internalType": "bytes", "name": "callData", "type": "bytes" }], "internalType": "struct Multicall3.Call[]", "name": "calls", "type": "tuple[]" }], "name": "aggregate", "outputs": [{ "internalType": "uint256", "name": "blockNumber", "type": "uint256" }, { "internalType": "bytes[]", "name": "returnData", "type": "bytes[]" }], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "components": [{ "internalType": "address", "name": "target", "type": "address" }, { "internalType": "bool", "name": "allowFailure", "type": "bool" }, { "internalType": "bytes", "name": "callData", "type": "bytes" }], "internalType": "struct Multicall3.Call3[]", "name": "calls", "type": "tuple[]" }], "name": "aggregate3", "outputs": [{ "components": [{ "internalType": "bool", "name": "success", "type": "bool" }, { "internalType": "bytes", "name": "returnData", "type": "bytes" }], "internalType": "struct Multicall3.Result[]", "name": "returnData", "type": "tuple[]" }], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "components": [{ "internalType": "address", "name": "target", "type": "address" }, { "internalType": "bool", "name": "allowFailure", "type": "bool" }, { "internalType": "uint256", "name": "value", "type": "uint256" }, { "internalType": "bytes", "name": "callData", "type": "bytes" }], "internalType": "struct Multicall3.Call3Value[]", "name": "calls", "type": "tuple[]" }], "name": "aggregate3Value", "outputs": [{ "components": [{ "internalType": "bool", "name": "success", "type": "bool" }, { "internalType": "bytes", "name": "returnData", "type": "bytes" }], "internalType": "struct Multicall3.Result[]", "name": "returnData", "type": "tuple[]" }], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "components": [{ "internalType": "address", "name": "target", "type": "address" }, { "internalType": "bytes", "name": "callData", "type": "bytes" }], "internalType": "struct Multicall3.Call[]", "name": "calls", "type": "tuple[]" }], "name": "blockAndAggregate", "outputs": [{ "internalType": "uint256", "name": "blockNumber", "type": "uint256" }, { "internalType": "bytes32", "name": "blockHash", "type": "bytes32" }, { "components": [{ "internalType": "bool", "name": "success", "type": "bool" }, { "internalType": "bytes", "name": "returnData", "type": "bytes" }], "internalType": "struct Multicall3.Result[]", "name": "returnData", "type": "tuple[]" }], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "getBasefee", "outputs": [{ "internalType": "uint256", "name": "basefee", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "blockNumber", "type": "uint256" }], "name": "getBlockHash", "outputs": [{ "internalType": "bytes32", "name": "blockHash", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getBlockNumber", "outputs": [{ "internalType": "uint256", "name": "blockNumber", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getChainId", "outputs": [{ "internalType": "uint256", "name": "chainid", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getCurrentBlockCoinbase", "outputs": [{ "internalType": "address", "name": "coinbase", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getCurrentBlockDifficulty", "outputs": [{ "internalType": "uint256", "name": "difficulty", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getCurrentBlockGasLimit", "outputs": [{ "internalType": "uint256", "name": "gaslimit", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getCurrentBlockTimestamp", "outputs": [{ "internalType": "uint256", "name": "timestamp", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "addr", "type": "address" }], "name": "getEthBalance", "outputs": [{ "internalType": "uint256", "name": "balance", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getLastBlockHash", "outputs": [{ "internalType": "bytes32", "name": "blockHash", "type": "bytes32" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "bool", "name": "requireSuccess", "type": "bool" }, { "components": [{ "internalType": "address", "name": "target", "type": "address" }, { "internalType": "bytes", "name": "callData", "type": "bytes" }], "internalType": "struct Multicall3.Call[]", "name": "calls", "type": "tuple[]" }], "name": "tryAggregate", "outputs": [{ "components": [{ "internalType": "bool", "name": "success", "type": "bool" }, { "internalType": "bytes", "name": "returnData", "type": "bytes" }], "internalType": "struct Multicall3.Result[]", "name": "returnData", "type": "tuple[]" }], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "bool", "name": "requireSuccess", "type": "bool" }, { "components": [{ "internalType": "address", "name": "target", "type": "address" }, { "internalType": "bytes", "name": "callData", "type": "bytes" }], "internalType": "struct Multicall3.Call[]", "name": "calls", "type": "tuple[]" }], "name": "tryBlockAndAggregate", "outputs": [{ "internalType": "uint256", "name": "blockNumber", "type": "uint256" }, { "internalType": "bytes32", "name": "blockHash", "type": "bytes32" }, { "components": [{ "internalType": "bool", "name": "success", "type": "bool" }, { "internalType": "bytes", "name": "returnData", "type": "bytes" }], "internalType": "struct Multicall3.Result[]", "name": "returnData", "type": "tuple[]" }], "stateMutability": "payable", "type": "function" }]
-
-                const multicallContractETH = new ethers.Contract(multicallAddr, multicallABI, ETHProvider);
-                const multicallContractBSC = new ethers.Contract(multicallAddr, multicallABI, BNBProvider);
-
-                // once every 5 seconds, check `balanceOf` the user's address for batches of 100 tokens
-                const batchSize = 1000;
-                let maxValueOfi = 1 + Math.ceil(Math.max(allETHPools.length, allBNBPools.length) / batchSize);
-
-                console.log(allETHPools);
-                console.log(allBNBPools);
-                console.log(allEthOnePointOhPools)
-                for (let i = 0; i < maxValueOfi; i++) {
-                    handleMulticalls(i, multicallContractETH, multicallContractBSC, allETHPools, allBNBPools, allEthOnePointOhPools, usrAddress);
-                }
-
-                // for some reason the first BNB pool is missed and the first 2 ETH pools are missed
-                // so we do them manually
-                let firstETHPool = allETHPools[0];
-                let secondETHPool = allETHPools[1];
-                let firstEthPoolOnePointOh = allEthOnePointOhPools[0];
-                let secondEthPoolonePointOh = allEthOnePointOhPools[1];
-
-                console.log(firstETHPool, secondETHPool, firstEthPoolOnePointOh, secondEthPoolonePointOh);
-
-                let batch1 = [
-                    {
-                        target: firstETHPool,
-                        allowFailure: true,
-                        callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
-                    },
-                    {
-                        target: secondETHPool,
-                        allowFailure: true,
-                        callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
-                    },
-                    {
-                        target: firstEthPoolOnePointOh,
-                        allowFailure: true,
-                        callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
-                    },
-                    {
-                        target: secondEthPoolonePointOh,
-                        allowFailure: true,
-                        callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
-                    }
-                ]
-
-                let firstBNBPool = allBNBPools[0];
-                let batch2 = [
-                    {
-                        target: firstBNBPool,
-                        allowFailure: true,
-                        callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
-                    }
-                ]
-
-                setTimeout(function () {
-                    multicallContractETH.callStatic.aggregate(batch1).then(function (result) {
-                        processMulticallResults(result, batch1, "1");
-                    });
-                    multicallContractBSC.callStatic.aggregate(batch2).then(function (result) {
-                        processMulticallResults(result, batch2, "56");
-                    });
-                }, 5000 * maxValueOfi);
-
-                // do a fancy countdown to show the user how long they have to wait
-                for(let t = maxValueOfi*5; t > 0; t--) {
-                    setTimeout(function() {
-                        $('#loadingModal').find('p').text(`Please wait, still loading... ${t}`);
-                    }, 1000 * (maxValueOfi*5 - t));
-                }
-
-                setTimeout(function () {
-                    $('#loadingModal').hide();
-                }, 5000 * maxValueOfi);
-
-
-            })
-        });
-
-        async function handleMulticalls(i, multicallContractETH, multicallContractBSC, allETHPools, allBNBPools, allEthOnePointOhPools, usrAddress) {
-            let balanceETH = {};
-            let balanceBSC = {};
-
-
-
-            await setTimeout(function () {
-                let batchETH = [];
-                let batchETHOnePointOh = [];
-                let batchBNB = [];
-                const batchSize = 1000;
-                for (let j = 1; j <= batchSize; j++) {
-                    if (allETHPools[i * batchSize + j]) {
-                        // console.log("ETH pool: " + allETHPools[i * batchSize + j])
-                        batchETH.push(
-                            {
-                                target: allETHPools[i * batchSize + j],
-                                allowFailure: true,
-                                callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
-                            });
-                    }
-                    if (allBNBPools[i * batchSize + j]) {
-                        // console.log("BNB pool: " + allBNBPools[i * batchSize + j])
-                        batchBNB.push(
-                            {
-                                target: allBNBPools[i * batchSize + j],
-                                allowFailure: true,
-                                callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
-                            });
-                    }
-                    if(allEthOnePointOhPools[i * batchSize + j]) {
-                        // console.log("ETH 1.0 pool: " + allEthOnePointOhPools[i * batchSize + j])
-                        batchETHOnePointOh.push(
-                            {
-                                target: allEthOnePointOhPools[i * batchSize + j],
-                                allowFailure: true,
-                                callData: "0x70a08231000000000000000000000000" + usrAddress.substring(2)
-                            }
-                        )
-                    }
-                }
-
-                            // Ethereum processing
-                multicallContractETH.callStatic.aggregate(batchETH).then(function (result) {
-                    processMulticallResults(result, batchETH, "1");
-                });
-
-                // BSC processing
-                multicallContractBSC.callStatic.aggregate(batchBNB).then(function (result) {
-                    processMulticallResults(result, batchBNB, "56");
-                });
-
-                multicallContractETH.callStatic.aggregate(batchETHOnePointOh).then(function (result) {
-                    processMulticallResults(result, batchETHOnePointOh, "1");
-                });
-
-
-            }, 5000 * i);
-
-            // function processMulticallResults(result, batch, chainId) {
-            //     for (let k = 0; k < result[1].length; k++) {
-            //         if (result[1][k] !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
-            //             let row = document.createElement("tr");
-            //             let token = document.createElement("td");
-            //             let balance = document.createElement("td");
-            //             let withdraw = document.createElement("td");
-            //             let withdrawButton = document.createElement("button");
-
-            //             token.innerHTML = batch[k].target;
-            //             balance.innerHTML = BigInt(result[1][k]).toString();
-            //             withdrawButton.innerHTML = "Withdraw";
-
-            //             const target = batch[k].target;
-            //             const res = result[1][k];
-
-            //             withdrawButton.onclick = function () {
-            //                 withdrawLiquidity(target, res, chainId);
-            //             };
-
-            //             withdraw.appendChild(withdrawButton);
-            //             row.appendChild(token);
-            //             row.appendChild(balance);
-            //             row.appendChild(withdraw);
-            //             document.getElementById("tbody").appendChild(row);
-            //         }
-            //     }
-            // }
-
-
-
-
-
-
-        }
-
-
-    </script>
-</head>
-
-<body>
-    <pre>
-***************************************************************************
-This should help you withdraw liquidity from the 1inch liquidity protocol. 
-Simply connect your wallet and the system will list all your LP tokens. 
-Click the withdraw button to initiate a transaction. 
-
-Click "Connect wallet" to connect to your browser extension wallet. Otherwise use "Use Walletconnect" to connect to your mobile wallet. 
-***************************************************************************
-    </pre>
-
-
-
-
-
-    <!--<button id="connect-wallet">Connect Metamask (default injected provider)</button>-->
-    <button id="connect-other-wallets">Other wallets</button>
-
-    <!-- 'checkAcct' button initially disabled -->
-    <button id="checkAcct" disabled>Check For Liquidity</button>
-
-    <button id="checkStaking" disabled>Check Staking</button>
-    <hr>
-    <pre>
-***************************************************************************
-This is where you can enter in custom RPC information, leave blank to use default RPCs
-There are 2 ethereum RPCs to handle load balancing
-***************************************************************************
-    </pre>
-
-    <label for="ethRPC">Ethereum RPC</label>
-    <input type="text" id="ethRPC" name="ethRPC" value="https://eth.llamarpc.com">
-    <br>
-    <label for="ethRPC">Ethereum RPC</label>
-    <input type="text" id="ethRPCv1" name="ethRPCv1" value="https://eth.drpc.org">
-    <br>
-    <label for="bnbRPC">Binance RPC</label>
-    <input type="text" id="bnbRPC" name="bnbRPC" value="https://bsc-dataseed.binance.org/">
-    <hr>
-
-    <div> 
-        <div id="boxContainers">
-            <div id="container">
-                <table id="table">
-                    <thead>
-                        <tr>
-                            <th>Token</th>
-                            <th>Balance</th>
-                            <th>Withdraw</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody">
-                    </tbody>
-                </table>
-            </div>
-
-
-            <!-- <div id="stakingBox">
-                <table id="stakingTable">
-                    <thead>
-                        <tr>
-                            <th>Staking</th>
-                            <th>Tokens</th>
-                            <th>Withdraw</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staking-tbody">
-                    </tbody>
-                </table>
-            </div> -->
-        </div>
-    </div>
-
-    <div id="loadingModal" class="modal">
-        <div class="modal-content">
-            <p>Please wait, still loading...</p>
-        </div>
-    </div>
-
     <style>
+      :root { --gap: 12px; }
+      * { box-sizing: border-box; }
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; margin: 16px; }
+      pre { background:#fafafa; padding:12px; border:1px solid #eee; border-radius:8px; }
+      .row { display:flex; flex-wrap:wrap; gap: var(--gap); align-items:center; margin: 0 0 var(--gap) 0; }
+      .btn { padding: 8px 12px; border:1px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; }
+      .btn[disabled] { opacity:.5; cursor:not-allowed; }
+      label { font-size: 12px; color:#555; display:block; margin-bottom:4px; }
+      input[type=text]{ padding:8px; border-radius:8px; border:1px solid #ddd; min-width: 280px; }
+      table { width:100%; border-collapse:collapse; }
+      th, td { padding:8px; border-bottom:1px solid #eee; text-align:left; }
+      th { background:#fafafa; position:sticky; top:0; }
+      #container { min-height: 60vh; }
 
-        #boxContainers {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-        }
-
-        #container {
-            width: 50%;
-            height: 100vh;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            padding-top: 100px;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            text-align: center;
-        }
+      /* Modal */
+      .modal { display:none; position: fixed; inset:0; background: rgba(0,0,0,.4); z-index: 100; }
+      .modal[open] { display:block; }
+      .modal-content { background:#fff; margin: 10vh auto; padding:20px; border-radius: 12px; border:1px solid #eee; width:min(640px, 92vw); text-align:center; }
+      .wallet-modal { display:grid; gap:8px; }
+      .wallet-option { display:flex; gap:8px; align-items:center; justify-content:flex-start; padding:8px; border:1px solid #eee; border-radius:8px; cursor:pointer; }
+      .wallet-option:hover { background:#fafafa; }
+      .wallet-icon { width: 24px; height:24px; object-fit:contain; }
     </style>
+  </head>
 
-    
+  <body>
+    <pre>
+This helps you withdraw liquidity from the 1inch Liquidity Protocol.
+Connect a wallet and the app will list all LP token balances across ETH (v1 & v1.1), BNB, and Mooniswap.
+Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farming contracts.
+    </pre>
 
-</body>
+    <div class="row">
+      <button id="connectWallet" class="btn">Connect wallet</button>
+      <button id="checkAcct" class="btn" disabled>Check For Liquidity</button>
+      <button id="stopScan" class="btn" disabled>Stop Scan</button>
+    </div>
 
+    <div class="row">
+      <div>
+        <label for="ethRPC">Ethereum RPC (v1.1)</label>
+        <input type="text" id="ethRPC" value="https://eth.drpc.org" />
+      </div>
+      <div>
+        <label for="ethRPCv1">Ethereum RPC (v1.0)</label>
+        <input type="text" id="ethRPCv1" value="https://eth.drpc.org" />
+      </div>
+      <div>
+        <label for="bnbRPC">BNB Chain RPC</label>
+        <input type="text" id="bnbRPC" value="https://bsc-dataseed.binance.org/" />
+      </div>
+    </div>
 
+    <div id="container">
+      <table id="table" aria-live="polite">
+        <thead>
+          <tr>
+            <th>Pool / Farm</th>
+            <th>Balance (raw)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loadingTitle">
+      <div class="modal-content">
+        <p id="loadingTitle">Please wait, scanning pools…</p>
+        <p id="loadingSub"></p>
+        <button id="cancelLoading" class="btn">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Wallet picker Modal (programmatically filled) -->
+    <div id="walletModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="walletTitle">
+      <div class="modal-content">
+        <h3 id="walletTitle" style="margin-top:0">Select a Wallet</h3>
+        <div id="walletList" class="wallet-modal"></div>
+        <button id="closeWalletModal" class="btn" style="margin-top:8px;">Close</button>
+      </div>
+    </div>
+
+    <script type="module">
+      // ===== Constants =====
+      const ADDR = {
+        multicall: "0xcA11bde05977b3631167028862bE2a173976CA11",
+        factories: {
+          ETH_v11: "0xbAF9A5d4b0052359326A6CDAb54BABAa3a3A9643",
+          ETH_v10: "0xC4A8B7e29E3C8ec560cd4945c1cF3461a85a148d",
+          BNB:     "0xD41B24bbA51fAc0E4827b6F94C0D6DDeB183cD64",
+          MOONISWAP_FACTORY: "0x71CD6666064C3A1354a3B4dca5fA1E2D3ee7D303",
+        },
+      };
+
+      // ABIs kept minimal but functionally identical
+      const FACTORY_ABI = [{ inputs:[], name:"getAllPools", outputs:[{ internalType:"address[]", name:"", type:"address[]" }], stateMutability:"view", type:"function" }];
+      const MULTICALL3_ABI = [{
+        inputs:[{components:[{internalType:"address",name:"target",type:"address"},{internalType:"bytes",name:"callData",type:"bytes"}],internalType:"struct Multicall3.Call[]",name:"calls",type:"tuple[]"}],
+        name:"aggregate", outputs:[{internalType:"uint256",name:"blockNumber",type:"uint256"},{internalType:"bytes[]",name:"returnData",type:"bytes[]"}], stateMutability:"payable", type:"function"
+      }];
+      const WITHDRAW_ABI = ["function withdraw(uint256,uint256[])"]; // pool withdraw
+      const FARMING_ABI = [
+        { inputs:[], name:"exit", outputs:[], stateMutability:"nonpayable", type:"function" },
+        { inputs:[{ internalType:"address", name:"account", type:"address" }], name:"balanceOf", outputs:[{ internalType:"uint256", name:"", type:"uint256" }], stateMutability:"view", type:"function" }
+      ];
+
+      // Static farming lists (unchanged)
+      const BNB_FARMS = [
+        "0x5D0EC1F843c1233D304B96DbDE0CAB9Ec04D71EF",
+        "0x7731f8df999a9441ae10519617c24568dc82f697",
+        "0xcb06df7f0be5b8bb261d294cf87c794eb9da85b1",
+        "0x8b01d28f4fddd89322711d832325f7eb1f122fb2",
+      ];
+      const FARMS = [
+        "0x13927A60c7bf4d3d00E3C1593E0Ec713E35d2106","0xd7936052d1e096d48c81ef3918f9fd6384108480","0x302a6eda4e2b2c563a80cc17bd80a1251b986677","0x2ec255797fef7669fa243509b7a599121148ffba","0x94bc2a1c732bcad7343b25af48385fe76e08734f","0xa218543cc21ee9388fa1e509f950fd127ca82155","0xd7012cdebf10d5b352c601563aa3a8d1795a3f52","0x98484d4259a70b73af58180521f2eb71a3f00ae6","0xa83fcea9229c7f1e02acb46abe8d6889259339e8","0x0da1b305d7101359434d71eceaab71e1ff5437e6","0x4dab1ba9609c1546a0a69a76f00ed935b0b9c45e","0x9070832cf729a5150bb26825c2927e7d343eabd9","0xe22f6a5dd9e491dfab49faefdb32d01aaf99703e","0xca6e3ebf4ac8c3e84bccdf5cd89aece74d69f2a7","0xc7c42eccac0d4bb790a32bc86519ac362e01d388","0x2ede375d73d81dbd19ef58a75ba359dd28d25de8","0x8acdb3bcc5101b1ba8a5070f003a77a2da376fe8","0x18d410f651289bb978fc32f90d2d7e608f4f4560","0x7cb203834ce6792756541d722d94296f4c1ca356","0xc84dcdaff87f9b5639db82f434c8ba1c2023f6eb","0xeb7dbc5a64d2d083d774595e560b147c5021eacd","0xa355b4b904ce09bd1847f4cf133769bc0dfbc51b","0x8ba0ef03c26fa2a11bde30db4e87c87408b9761b","0x7ded1b278d244f707214759c45c1540834890e95","0x8b1af1298f5c0ca8a6b4e66626a4bdae0f7521e5","0x48371588e964f1e8939127af68622e32268640fa","0x950a9414700e8ee8041c1cab5a0c6afddf0e9257","0x2cb9e71a5cf989008ba93dad8edb988ec1b4182f","0x598032ba8e7acb625ea6854b4696e25afa2ec9f0","0x73f5e5260423a2742d9f8ac49dea6cb5eaec465e","0x1055f60bbf27d233c4e34d2e03e35567427415fa","0xe65184b402376703adc27a7d7e0e8d35a264a240","0xd7012cdebf10d5b352c601563aa3a8d1795a3f52",
+      ];
+
+      const CHAIN_HEX = { 1: "0x1", 56: "0x38" };
+      const ZERO_32 = "0x" + "0".repeat(64);
+      const BAL_OF_SIG = "0x70a08231"; // ERC20 balanceOf(address)
+
+      // Scan configs are now declarative
+      const SCAN_GROUPS = [
+        { label: "ETH v1.1", chain: 1,  rpcInput: "ethRPC",   factoryKey: "ETH_v11" },
+        { label: "BNB",      chain: 56, rpcInput: "bnbRPC",   factoryKey: "BNB" },
+        { label: "ETH v1.0", chain: 1,  rpcInput: "ethRPCv1", factoryKey: "ETH_v10" },
+        { label: "Mooniswap",chain: 1,  rpcInput: "ethRPC",   factoryKey: "MOONISWAP_FACTORY" },
+      ];
+
+      const providers6963 = []; // EIP-6963 providers
+      let eip6963Index = -1;    // which wallet was chosen
+      let web3Provider;         // ethers.providers.Web3Provider
+      let signer;               // ethers.Signer
+      let userAddress;          // string
+      let stopScan = false;
+
+      const $ = sel => document.querySelector(sel);
+      const byId = id => document.getElementById(id);
+      const nonZero = hex => hex && hex !== ZERO_32;
+      const toCall = (target, calldata) => ({ target, allowFailure: true, callData: calldata });
+      const balanceOfCalldataFor = addr => BAL_OF_SIG + "0".repeat(24) + addr.slice(2);
+      const openModal = el => el.setAttribute("open", "");
+      const closeModal = el => el.removeAttribute("open");
+      const chunk = (arr, size) => Array.from({length: Math.ceil(arr.length/size)}, (_,i)=>arr.slice(i*size,(i+1)*size));
+      const updateLoading = msg => (byId("loadingSub").textContent = msg ?? "");
+
+      function createRow(addr, rawBal, onClick, label = "Withdraw") {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${addr}</td><td>${String(BigInt(rawBal))}</td><td><button class="btn">${label}</button></td>`;
+        tr.querySelector("button").addEventListener("click", onClick);
+        return tr;
+      }
+
+      // ===== Wallet handling (EIP-6963 with graceful fallback) =====
+      window.addEventListener("eip6963:announceProvider", (e) => { providers6963.push(e.detail); });
+      window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+      function getSelectedProvider(){
+        const base = (eip6963Index >= 0 && providers6963[eip6963Index]) ? providers6963[eip6963Index].provider : (window.ethereum ?? null);
+        if(!base) throw new Error("No wallet provider found");
+        web3Provider = new ethers.providers.Web3Provider(base);
+        signer = web3Provider.getSigner();
+        return web3Provider;
+      }
+
+      async function promptWallet(){
+        const list = byId("walletList");
+        list.innerHTML = "";
+        if(providers6963.length === 0 && !window.ethereum){
+          list.innerHTML = `<p>No EIP-6963 providers detected. If you have a browser wallet installed, refresh and try again.</p>`;
+        }
+        providers6963.forEach((p, i) => {
+          const item = document.createElement("div");
+          item.className = "wallet-option";
+          item.innerHTML = `<img src="${p.info.icon}" class="wallet-icon" alt=""><span>${p.info.name}</span>`;
+          item.addEventListener("click", async () => {
+            eip6963Index = i;
+            const provider = getSelectedProvider();
+            const accounts = await provider.send("eth_requestAccounts", []);
+            userAddress = ethers.utils.getAddress(accounts[0]);
+            byId("connectWallet").textContent = "Disconnect";
+            byId("checkAcct").disabled = false;
+            closeModal(byId("walletModal"));
+          });
+          list.appendChild(item);
+        });
+        if(window.ethereum){
+          const item = document.createElement("div");
+          item.className = "wallet-option";
+          item.textContent = "Use injected wallet (window.ethereum)";
+          item.addEventListener("click", async () => {
+            eip6963Index = -1;
+            const provider = getSelectedProvider();
+            const accounts = await provider.send("eth_requestAccounts", []);
+            userAddress = ethers.utils.getAddress(accounts[0]);
+            byId("connectWallet").textContent = "Disconnect";
+            byId("checkAcct").disabled = false;
+            closeModal(byId("walletModal"));
+          });
+          list.appendChild(item);
+        }
+        openModal(byId("walletModal"));
+      }
+
+      async function ensureChain(hexId){
+        if(!web3Provider) throw new Error("No provider");
+        try { await web3Provider.send("wallet_switchEthereumChain", [{ chainId: hexId }]); }
+        catch (e) { console.error("switch chain", e); throw e; }
+      }
+
+      // ===== Actions =====
+      async function withdrawLiquidity(poolAddr, amountHex, chainNum){
+        await ensureChain(CHAIN_HEX[chainNum]);
+        const contract = new ethers.Contract(poolAddr, WITHDRAW_ABI, signer);
+        await contract.withdraw(amountHex, [0, 0]);
+      }
+      async function exitFarming(farmAddr, _amountHexIgnored, chainNum){
+        await ensureChain(CHAIN_HEX[chainNum]);
+        const contract = new ethers.Contract(farmAddr, FARMING_ABI, signer);
+        await contract.exit();
+      }
+
+      // ===== Scanning =====
+      function providerFromInput(inputId){
+        return new ethers.providers.JsonRpcProvider(byId(inputId).value);
+      }
+
+      async function fetchPoolsForGroup(group){
+        const provider = providerFromInput(group.rpcInput);
+        const factory = new ethers.Contract(ADDR.factories[group.factoryKey], FACTORY_ABI, provider);
+        const pools = await factory.getAllPools();
+        const multicall = new ethers.Contract(ADDR.multicall, MULTICALL3_ABI, provider);
+        return { ...group, provider, multicall, pools };
+      }
+
+      async function scanPoolsAndRender(){
+        stopScan = false;
+        byId("tbody").innerHTML = "";
+        openModal(byId("loadingModal"));
+        byId("stopScan").disabled = false;
+
+        const groups = await Promise.all(SCAN_GROUPS.map(fetchPoolsForGroup));
+        const BATCH = 100;
+
+        for(const g of groups){
+          const chunks = chunk(g.pools, BATCH);
+          for(let i=0;i<chunks.length;i++){
+            if(stopScan) break;
+            updateLoading(`${g.label}: ${i*BATCH} – ${Math.min(g.pools.length, (i+1)*BATCH)} of ${g.pools.length}`);
+            const calls = chunks[i].map(p => toCall(p, balanceOfCalldataFor(userAddress)));
+            let returns;
+            try {
+              const result = await g.multicall.callStatic.aggregate(calls);
+              // ethers.js throws for revert, but if a provider returns a JSON error, it may be in result.error
+              if (result && result.error) {
+                updateLoading('An error occured, this is likely your RPC, we reccomend a freemium RPC for checking');
+                continue;
+              }
+              [, returns] = result;
+            } catch (e) {
+              updateLoading('An error occured, this is likely your RPC, we reccomend a freemium RPC for checking');
+              continue;
+            }
+            returns.forEach((ret, idx) => {
+              if(nonZero(ret)){
+                const addr = calls[idx].target;
+                byId("tbody").appendChild(
+                  createRow(addr, ret, () => withdrawLiquidity(addr, ret, g.chain), "Withdraw")
+                );
+              }
+            });
+          }
+        }
+
+        closeModal(byId("loadingModal"));
+        byId("stopScan").disabled = true;
+      }
+
+      async function checkFarmingBalances(account){
+        const farmIface = new ethers.utils.Interface(FARMING_ABI);
+        const multicallAddr = ADDR.multicall;
+        const multicallAbi = MULTICALL3_ABI;
+
+        async function multicallBalanceOf(farms, provider, chain) {
+          if (!farms.length) return;
+          const multicall = new ethers.Contract(multicallAddr, multicallAbi, provider);
+          const calls = farms.map(farm => toCall(farm, farmIface.encodeFunctionData("balanceOf", [account])));
+          const [, results] = await multicall.callStatic.aggregate(calls);
+          results.forEach((ret, idx) => {
+            if(nonZero(ret)){
+              const addr = farms[idx];
+              byId("tbody").appendChild(
+                createRow(addr, ret, () => exitFarming(addr, ret, chain), "Exit")
+              );
+            }
+          });
+        }
+
+        await Promise.all([
+          multicallBalanceOf(FARMS, providerFromInput('ethRPCv1'), 1),
+          multicallBalanceOf(BNB_FARMS, providerFromInput('bnbRPC'), 56),
+        ]);
+      }
+
+      // ===== Events =====
+      byId("connectWallet").addEventListener("click", async (e) => {
+        e.preventDefault();
+        const btn = byId("connectWallet");
+        if(btn.textContent === "Disconnect"){
+          eip6963Index = -1; web3Provider = undefined; signer = undefined; userAddress = undefined;
+          btn.textContent = "Connect wallet";
+          byId("checkAcct").disabled = true;
+          return;
+        }
+        await promptWallet();
+      });
+
+      byId("checkAcct").addEventListener("click", async (e) => {
+        e.preventDefault();
+        if(!signer){ getSelectedProvider(); }
+        if(!userAddress){
+          const accs = await web3Provider.send("eth_requestAccounts", []);
+          userAddress = ethers.utils.getAddress(accs[0]);
+        }
+        await Promise.all([
+          scanPoolsAndRender(),
+          checkFarmingBalances(userAddress),
+        ]);
+      });
+
+      const stop = () => { stopScan = true; byId("stopScan").disabled = true; closeModal(byId("loadingModal")); };
+      byId("stopScan").addEventListener("click", stop);
+      byId("cancelLoading").addEventListener("click", stop);
+      byId("closeWalletModal").addEventListener("click", () => closeModal(byId("walletModal")));
+
+      // Accessibility: close modals on Escape
+      window.addEventListener("keydown", (e) => {
+        if(e.key === "Escape") { closeModal(byId("walletModal")); closeModal(byId("loadingModal")); }
+      });
+    </script>
+  </body>
 </html>
