@@ -36,7 +36,7 @@
   <body>
     <pre>
 This helps you withdraw liquidity from the 1inch Liquidity Protocol.
-Connect a wallet and the app will list all LP token balances across ETH (v1 & v1.1), BNB, and Mooniswap.
+Connect a wallet and the app will list all LP token balances across ETH (v1 & v1.1), BNB, and Mooniswap, plus st1inch farming positions.
 Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farming contracts.
     </pre>
 
@@ -66,6 +66,8 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
         <thead>
           <tr>
             <th>Pool / Farm</th>
+            <th>Position type</th>
+            <th>Network</th>
             <th>Balance (raw)</th>
             <th>Action</th>
           </tr>
@@ -116,15 +118,24 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
         { inputs:[{ internalType:"address", name:"account", type:"address" }], name:"balanceOf", outputs:[{ internalType:"uint256", name:"", type:"uint256" }], stateMutability:"view", type:"function" }
       ];
 
-      // Static farming lists (unchanged)
+      // st1inch v1.0 farms from index2.html. Keep these separate so users can
+      // clearly identify legacy st1inch positions from v1.1 farms.
+      const ST1INCH_V1_FARMS = [
+        "0x13927A60c7bf4d3d00E3C1593E0Ec713E35d2106",
+        "0xd7936052d1e096d48c81ef3918f9fd6384108480",
+        "0x302a6eda4e2b2c563a80cc17bd80a1251b986677",
+        "0x2ec255797fef7669fa243509b7a599121148ffba",
+        "0x94bc2a1c732bcad7343b25af48385fe76e08734f",
+        "0xa218543cc21ee9388fa1e509f950fd127ca82155",
+      ];
       const BNB_FARMS = [
         "0x5D0EC1F843c1233D304B96DbDE0CAB9Ec04D71EF",
         "0x7731f8df999a9441ae10519617c24568dc82f697",
         "0xcb06df7f0be5b8bb261d294cf87c794eb9da85b1",
         "0x8b01d28f4fddd89322711d832325f7eb1f122fb2",
       ];
-      const FARMS = [
-        "0x13927A60c7bf4d3d00E3C1593E0Ec713E35d2106","0xd7936052d1e096d48c81ef3918f9fd6384108480","0x302a6eda4e2b2c563a80cc17bd80a1251b986677","0x2ec255797fef7669fa243509b7a599121148ffba","0x94bc2a1c732bcad7343b25af48385fe76e08734f","0xa218543cc21ee9388fa1e509f950fd127ca82155","0xd7012cdebf10d5b352c601563aa3a8d1795a3f52","0x98484d4259a70b73af58180521f2eb71a3f00ae6","0xa83fcea9229c7f1e02acb46abe8d6889259339e8","0x0da1b305d7101359434d71eceaab71e1ff5437e6","0x4dab1ba9609c1546a0a69a76f00ed935b0b9c45e","0x9070832cf729a5150bb26825c2927e7d343eabd9","0xe22f6a5dd9e491dfab49faefdb32d01aaf99703e","0xca6e3ebf4ac8c3e84bccdf5cd89aece74d69f2a7","0xc7c42eccac0d4bb790a32bc86519ac362e01d388","0x2ede375d73d81dbd19ef58a75ba359dd28d25de8","0x8acdb3bcc5101b1ba8a5070f003a77a2da376fe8","0x18d410f651289bb978fc32f90d2d7e608f4f4560","0x7cb203834ce6792756541d722d94296f4c1ca356","0xc84dcdaff87f9b5639db82f434c8ba1c2023f6eb","0xeb7dbc5a64d2d083d774595e560b147c5021eacd","0xa355b4b904ce09bd1847f4cf133769bc0dfbc51b","0x8ba0ef03c26fa2a11bde30db4e87c87408b9761b","0x7ded1b278d244f707214759c45c1540834890e95","0x8b1af1298f5c0ca8a6b4e66626a4bdae0f7521e5","0x48371588e964f1e8939127af68622e32268640fa","0x950a9414700e8ee8041c1cab5a0c6afddf0e9257","0x2cb9e71a5cf989008ba93dad8edb988ec1b4182f","0x598032ba8e7acb625ea6854b4696e25afa2ec9f0","0x73f5e5260423a2742d9f8ac49dea6cb5eaec465e","0x1055f60bbf27d233c4e34d2e03e35567427415fa","0xe65184b402376703adc27a7d7e0e8d35a264a240","0xd7012cdebf10d5b352c601563aa3a8d1795a3f52",
+      const ST1INCH_V11_FARMS = [
+        "0xd7012cdebf10d5b352c601563aa3a8d1795a3f52","0x98484d4259a70b73af58180521f2eb71a3f00ae6","0xa83fcea9229c7f1e02acb46abe8d6889259339e8","0x0da1b305d7101359434d71eceaab71e1ff5437e6","0x4dab1ba9609c1546a0a69a76f00ed935b0b9c45e","0x9070832cf729a5150bb26825c2927e7d343eabd9","0xe22f6a5dd9e491dfab49faefdb32d01aaf99703e","0xca6e3ebf4ac8c3e84bccdf5cd89aece74d69f2a7","0xc7c42eccac0d4bb790a32bc86519ac362e01d388","0x2ede375d73d81dbd19ef58a75ba359dd28d25de8","0x8acdb3bcc5101b1ba8a5070f003a77a2da376fe8","0x18d410f651289bb978fc32f90d2d7e608f4f4560","0x7cb203834ce6792756541d722d94296f4c1ca356","0xc84dcdaff87f9b5639db82f434c8ba1c2023f6eb","0xeb7dbc5a64d2d083d774595e560b147c5021eacd","0xa355b4b904ce09bd1847f4cf133769bc0dfbc51b","0x8ba0ef03c26fa2a11bde30db4e87c87408b9761b","0x7ded1b278d244f707214759c45c1540834890e95","0x8b1af1298f5c0ca8a6b4e66626a4bdae0f7521e5","0x48371588e964f1e8939127af68622e32268640fa","0x950a9414700e8ee8041c1cab5a0c6afddf0e9257","0x2cb9e71a5cf989008ba93dad8edb988ec1b4182f","0x598032ba8e7acb625ea6854b4696e25afa2ec9f0","0x73f5e5260423a2742d9f8ac49dea6cb5eaec465e","0x1055f60bbf27d233c4e34d2e03e35567427415fa","0xe65184b402376703adc27a7d7e0e8d35a264a240",
       ];
 
       const CHAIN_HEX = { 1: "0x1", 56: "0x38" };
@@ -156,10 +167,20 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
       const chunk = (arr, size) => Array.from({length: Math.ceil(arr.length/size)}, (_,i)=>arr.slice(i*size,(i+1)*size));
       const updateLoading = msg => (byId("loadingSub").textContent = msg ?? "");
 
-      function createRow(addr, rawBal, onClick, label = "Withdraw") {
+      function createRow(addr, rawBal, onClick, label = "Withdraw", positionType = "LP position", network = "") {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${addr}</td><td>${String(BigInt(rawBal))}</td><td><button class="btn">${label}</button></td>`;
-        tr.querySelector("button").addEventListener("click", onClick);
+        [addr, positionType, network, String(BigInt(rawBal))].forEach(value => {
+          const td = document.createElement("td");
+          td.textContent = value;
+          tr.appendChild(td);
+        });
+        const action = document.createElement("button");
+        action.className = "btn";
+        action.textContent = label;
+        action.addEventListener("click", onClick);
+        const actionCell = document.createElement("td");
+        actionCell.appendChild(action);
+        tr.appendChild(actionCell);
         return tr;
       }
 
@@ -277,7 +298,7 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
               if(nonZero(ret)){
                 const addr = calls[idx].target;
                 byId("tbody").appendChild(
-                  createRow(addr, ret, () => withdrawLiquidity(addr, ret, g.chain), "Withdraw")
+                  createRow(addr, ret, () => withdrawLiquidity(addr, ret, g.chain), "Withdraw", "LP position", g.label)
                 );
               }
             });
@@ -293,24 +314,58 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
         const multicallAddr = ADDR.multicall;
         const multicallAbi = MULTICALL3_ABI;
 
-        async function multicallBalanceOf(farms, provider, chain) {
+        // The legacy v1 contracts can revert balanceOf for an account with no
+        // position. Check each one directly, as index2.html does, so one empty
+        // farm never prevents the remaining st1inch v1 positions from showing.
+        async function checkSt1InchV1Balances() {
+          const provider = providerFromInput("ethRPCv1");
+          const balanceOfCalldata = farmIface.encodeFunctionData("balanceOf", [account]);
+          for (const [index, farm] of ST1INCH_V1_FARMS.entries()) {
+            if (stopScan) return;
+            updateLoading(`Checking st1inch v1 farming: ${index + 1} of ${ST1INCH_V1_FARMS.length}`);
+            try {
+              const result = await provider.call({ to: farm, data: balanceOfCalldata });
+              if (result && BigInt(result) !== 0n) {
+                byId("tbody").appendChild(
+                  createRow(farm, result, () => exitFarming(farm, result, 1), "Exit", "st1inch v1 farming", "Ethereum")
+                );
+              }
+            } catch (error) {
+              // A reverted balanceOf means this account has no usable v1 position
+              // in that farm. Continue checking the rest of the legacy farms.
+              console.debug(`No st1inch v1 position at ${farm}:`, error);
+            }
+          }
+        }
+
+        async function multicallBalanceOf(farms, provider, chain, positionType, network) {
           if (!farms.length) return;
           const multicall = new ethers.Contract(multicallAddr, multicallAbi, provider);
-          const calls = farms.map(farm => toCall(farm, farmIface.encodeFunctionData("balanceOf", [account])));
-          const [, results] = await multicall.callStatic.aggregate(calls);
-          results.forEach((ret, idx) => {
-            if(nonZero(ret)){
-              const addr = farms[idx];
-              byId("tbody").appendChild(
-                createRow(addr, ret, () => exitFarming(addr, ret, chain), "Exit")
-              );
+          for (const farmsBatch of chunk(farms, 100)) {
+            if (stopScan) return;
+            updateLoading(`Checking ${positionType}: ${farmsBatch.length} farm${farmsBatch.length === 1 ? "" : "s"}`);
+            const calls = farmsBatch.map(farm => toCall(farm, farmIface.encodeFunctionData("balanceOf", [account])));
+            try {
+              const [, results] = await multicall.callStatic.aggregate(calls);
+              results.forEach((ret, idx) => {
+                if(nonZero(ret)){
+                  const addr = farmsBatch[idx];
+                  byId("tbody").appendChild(
+                    createRow(addr, ret, () => exitFarming(addr, ret, chain), "Exit", positionType, network)
+                  );
+                }
+              });
+            } catch (error) {
+              console.error(`Unable to check ${positionType}:`, error);
+              updateLoading(`Unable to check ${positionType}; try another RPC and scan again.`);
             }
-          });
+          }
         }
 
         await Promise.all([
-          multicallBalanceOf(FARMS, providerFromInput('ethRPCv1'), 1),
-          multicallBalanceOf(BNB_FARMS, providerFromInput('bnbRPC'), 56),
+          checkSt1InchV1Balances(),
+          multicallBalanceOf(ST1INCH_V11_FARMS, providerFromInput('ethRPC'), 1, "st1inch v1.1 farming", "Ethereum"),
+          multicallBalanceOf(BNB_FARMS, providerFromInput('bnbRPC'), 56, "Farming", "BNB"),
         ]);
       }
 
