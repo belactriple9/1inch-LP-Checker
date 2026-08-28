@@ -69,7 +69,7 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
             <th>Position</th>
             <th>Position type</th>
             <th>Network</th>
-            <th>Balance (raw)</th>
+            <th>Amount</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -115,6 +115,23 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
       }];
       const WITHDRAW_ABI = ["function withdraw(uint256,uint256[])"]; // pool withdraw
       const ST1INCH_ABI = ["function unstake(uint256 amount)"];
+      const ST1INCH_V2_ABI = [
+        "function depositors(address account) view returns (uint40 lockTime, uint40 unlockTime, uint176 amount)",
+        "function emergencyExit() view returns (bool)",
+        "function minLockPeriodRatio() view returns (uint256)",
+        "function earlyWithdrawLoss(address account) view returns (uint256 loss, uint256 ret, bool canWithdraw)",
+        "function withdraw()",
+        "function earlyWithdraw(uint256 minReturn, uint256 maxLoss)",
+        "function hasPod(address account, address pod) view returns (bool)",
+      ];
+      const POWER_POD_ABI = ["function delegated(address account) view returns (address)"];
+      const ST1INCH_V2 = {
+        address: "0x9A0C8Ff858d273f57072D714bca7411D717501D7",
+        powerPod: "0xAccfAc2339e16DC80c50d2fa81b5c2B049B4f947",
+        chain: 1,
+        rpcInput: "ethRPC",
+        network: "Ethereum",
+      };
       const ST1INCH_TOKENS = [
         { address: "0xA0446D8804611944F1B527eCD37d7dcbE442caba", chain: 1, rpcInput: "ethRPC", network: "Ethereum" },
         { address: "0x73F0a6927A3c04E679074e70DFb9105F453e799D", chain: 56, rpcInput: "bnbRPC", network: "BNB Chain" },
@@ -149,9 +166,9 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
       const chunk = (arr, size) => Array.from({length: Math.ceil(arr.length/size)}, (_,i)=>arr.slice(i*size,(i+1)*size));
       const updateLoading = msg => (byId("loadingSub").textContent = msg ?? "");
 
-      function createRow(addr, rawBal, onClick, label = "Withdraw", positionType = "LP position", network = "", disabledActionLabel = "—") {
+      function createRow(addr, rawBal, onClick, label = "Withdraw", positionType = "LP position", network = "", disabledActionLabel = "—", displayAmount) {
         const tr = document.createElement("tr");
-        [addr, positionType, network, String(BigInt(rawBal))].forEach(value => {
+        [addr, positionType, network, displayAmount ?? String(BigInt(rawBal))].forEach(value => {
           const td = document.createElement("td");
           td.textContent = value;
           tr.appendChild(td);
@@ -161,7 +178,18 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
           const action = document.createElement("button");
           action.className = "btn";
           action.textContent = label;
-          action.addEventListener("click", onClick);
+          action.addEventListener("click", async () => {
+            action.disabled = true;
+            try {
+              await onClick();
+            } catch (error) {
+              console.error(`${label} failed:`, error);
+              const rejected = error?.code === 4001 || error?.code === "ACTION_REJECTED";
+              alert(rejected ? "Transaction cancelled." : `${label} failed. Please check your wallet and try again.`);
+            } finally {
+              action.disabled = false;
+            }
+          });
           actionCell.appendChild(action);
         } else {
           actionCell.textContent = disabledActionLabel;
@@ -177,7 +205,9 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
       function getSelectedProvider(){
         const base = (eip6963Index >= 0 && providers6963[eip6963Index]) ? providers6963[eip6963Index].provider : (window.ethereum ?? null);
         if(!base) throw new Error("No wallet provider found");
-        web3Provider = new ethers.providers.Web3Provider(base);
+        // "any" lets ethers follow wallet network changes instead of treating a
+        // successful wallet_switchEthereumChain call as a provider failure.
+        web3Provider = new ethers.providers.Web3Provider(base, "any");
         signer = web3Provider.getSigner();
         return web3Provider;
       }
@@ -240,6 +270,63 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
         const contract = new ethers.Contract(tokenAddr, ST1INCH_ABI, signer);
         await contract.unstake(amountHex);
       }
+
+      function formatTokenAmount(amount) {
+        const [whole, fraction = ""] = ethers.utils.formatUnits(amount, 18).split(".");
+        const shortFraction = fraction.slice(0, 6).replace(/0+$/, "");
+        return `${ethers.utils.commify(shortFraction ? `${whole}.${shortFraction}` : whole)} 1INCH`;
+      }
+
+      async function exitSt1InchV2(){
+        await ensureChain(CHAIN_HEX[ST1INCH_V2.chain]);
+        const contract = new ethers.Contract(ST1INCH_V2.address, ST1INCH_V2_ABI, signer);
+        const account = await signer.getAddress();
+        const [depositor, isEmergency, minLockRatio] = await Promise.all([
+          contract.depositors(account),
+          contract.emergencyExit(),
+          contract.minLockPeriodRatio(),
+        ]);
+
+        if (depositor.amount.isZero()) {
+          alert("No st1INCH v2 stake remains to unstake.");
+          return;
+        }
+
+        const latestBlock = await web3Provider.getBlock("latest");
+        if (isEmergency || latestBlock.timestamp >= depositor.unlockTime.toNumber()) {
+          await contract.callStatic.withdraw();
+          const tx = await contract.withdraw();
+          await tx.wait();
+          alert("Unstake complete.");
+          return;
+        }
+
+        const lockTime = depositor.lockTime.toBigInt();
+        const unlockTime = depositor.unlockTime.toBigInt();
+        const allowedAt = lockTime + (unlockTime - lockTime) * minLockRatio.toBigInt() / 1000000000n;
+        if (BigInt(latestBlock.timestamp) < allowedAt) {
+          alert(`This stake cannot be withdrawn early until ${new Date(Number(allowedAt) * 1000).toLocaleString()}.`);
+          return;
+        }
+
+        const quote = await contract.earlyWithdrawLoss(account);
+        if (!quote.canWithdraw) {
+          alert("The contract does not currently allow this stake to be withdrawn early.");
+          return;
+        }
+
+        const proceed = confirm(
+          `This stake is still locked. Unstaking now returns about ${formatTokenAmount(quote.ret)} and forfeits about ${formatTokenAmount(quote.loss)}. Continue?`
+        );
+        if (!proceed) return;
+
+        // The quote improves as time passes: using it as both bounds protects the
+        // user from receiving less or losing more than the amount they confirmed.
+        await contract.callStatic.earlyWithdraw(quote.ret, quote.loss);
+        const tx = await contract.earlyWithdraw(quote.ret, quote.loss);
+        await tx.wait();
+        alert("Unstake complete.");
+      }
       // ===== Scanning =====
       function providerFromInput(inputId){
         return new ethers.providers.JsonRpcProvider(byId(inputId).value);
@@ -297,6 +384,43 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
       }
 
       async function checkSt1InchBalances(account){
+        try {
+          updateLoading("Checking st1INCH v2 on Ethereum…");
+          const provider = providerFromInput(ST1INCH_V2.rpcInput);
+          const staking = new ethers.Contract(ST1INCH_V2.address, ST1INCH_V2_ABI, provider);
+          const powerPod = new ethers.Contract(ST1INCH_V2.powerPod, POWER_POD_ABI, provider);
+          const depositor = await staking.depositors(account);
+          if (!depositor.amount.isZero()) {
+            // Delegation is intentionally only a background check. Burning st1INCH
+            // updates the attached PowerPod in the same transaction, so no separate
+            // undelegation transaction is needed before either withdrawal path.
+            const [hasPowerPod, delegatee] = await Promise.allSettled([
+              staking.hasPod(account, ST1INCH_V2.powerPod),
+              powerPod.delegated(account),
+            ]);
+            console.debug("st1INCH v2 delegation", {
+              hasPowerPod: hasPowerPod.status === "fulfilled" ? hasPowerPod.value : "unknown",
+              delegatee: delegatee.status === "fulfilled" ? delegatee.value : "unknown",
+            });
+            const connectedAccountMatches = userAddress && userAddress.toLowerCase() === account.toLowerCase();
+            byId("tbody").appendChild(
+              createRow(
+                ST1INCH_V2.address,
+                depositor.amount.toHexString(),
+                connectedAccountMatches ? exitSt1InchV2 : null,
+                "Unstake",
+                "st1INCH v2",
+                ST1INCH_V2.network,
+                "Connect this wallet to unstake",
+                formatTokenAmount(depositor.amount)
+              )
+            );
+          }
+        } catch (error) {
+          console.error("Unable to check st1INCH v2 on Ethereum:", error);
+          updateLoading("Unable to check st1INCH v2; try another Ethereum RPC and scan again.");
+        }
+
         for (const [index, token] of ST1INCH_TOKENS.entries()) {
           if (stopScan) return;
           updateLoading(`Checking st1inch on ${token.network}: ${index + 1} of ${ST1INCH_TOKENS.length}`);
