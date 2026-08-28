@@ -60,10 +60,6 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
         <label for="bnbRPC">BNB Chain RPC</label>
         <input type="text" id="bnbRPC" value="https://bsc-dataseed.binance.org/" />
       </div>
-      <div>
-        <label for="walletAddress">Wallet address to check (optional, st1inch-only)</label>
-        <input type="text" id="walletAddress" placeholder="0x…" autocomplete="off" spellcheck="false" />
-      </div>
     </div>
 
     <div id="container">
@@ -203,7 +199,7 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
             userAddress = ethers.utils.getAddress(accounts[0]);
             byId("connectWallet").textContent = "Disconnect";
             byId("checkAcct").disabled = false;
-            updateStakeButton();
+            byId("checkStake").disabled = false;
             closeModal(byId("walletModal"));
           });
           list.appendChild(item);
@@ -219,7 +215,7 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
             userAddress = ethers.utils.getAddress(accounts[0]);
             byId("connectWallet").textContent = "Disconnect";
             byId("checkAcct").disabled = false;
-            updateStakeButton();
+            byId("checkStake").disabled = false;
             closeModal(byId("walletModal"));
           });
           list.appendChild(item);
@@ -247,18 +243,6 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
       // ===== Scanning =====
       function providerFromInput(inputId){
         return new ethers.providers.JsonRpcProvider(byId(inputId).value);
-      }
-
-      function stakeAccountToCheck(){
-        const suppliedAddress = byId("walletAddress").value.trim();
-        if (suppliedAddress) return ethers.utils.getAddress(suppliedAddress);
-        if (userAddress) return userAddress;
-        throw new Error("Connect a wallet or enter an address to check st1inch.");
-      }
-
-      function updateStakeButton(){
-        const suppliedAddress = byId("walletAddress").value.trim();
-        byId("checkStake").disabled = !userAddress && !ethers.utils.isAddress(suppliedAddress);
       }
 
       async function fetchPoolsForGroup(group){
@@ -350,7 +334,7 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
           eip6963Index = -1; web3Provider = undefined; signer = undefined; userAddress = undefined;
           btn.textContent = "Connect wallet";
           byId("checkAcct").disabled = true;
-          updateStakeButton();
+          byId("checkStake").disabled = true;
           return;
         }
         await promptWallet();
@@ -368,21 +352,13 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
 
       byId("checkStake").addEventListener("click", async (e) => {
         e.preventDefault();
-        let account;
-        try {
-          account = stakeAccountToCheck();
-        } catch (error) {
-          alert(error.message);
-          return;
-        }
-
         stopScan = false;
         byId("tbody").innerHTML = "";
         byId("stopScan").disabled = false;
         openModal(byId("loadingModal"));
         updateLoading("Checking st1inch balances…");
         try {
-          await checkSt1InchBalances(account);
+          await checkSt1InchBalances(userAddress);
           if (!stopScan) updateLoading("st1inch check complete.");
         } finally {
           closeModal(byId("loadingModal"));
@@ -394,7 +370,6 @@ Use "Check for Stake" to find st1inch balances on Ethereum and BNB Chain. Click 
       byId("stopScan").addEventListener("click", stop);
       byId("cancelLoading").addEventListener("click", stop);
       byId("closeWalletModal").addEventListener("click", () => closeModal(byId("walletModal")));
-      byId("walletAddress").addEventListener("input", updateStakeButton);
 
       // Accessibility: close modals on Escape
       window.addEventListener("keydown", (e) => {
