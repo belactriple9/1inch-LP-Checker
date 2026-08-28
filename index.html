@@ -43,6 +43,7 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
     <div class="row">
       <button id="connectWallet" class="btn">Connect wallet</button>
       <button id="checkAcct" class="btn" disabled>Check For Liquidity</button>
+      <button id="checkStake" class="btn" disabled>Check for Stake</button>
       <button id="stopScan" class="btn" disabled>Stop Scan</button>
     </div>
 
@@ -58,6 +59,10 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
       <div>
         <label for="bnbRPC">BNB Chain RPC</label>
         <input type="text" id="bnbRPC" value="https://bsc-dataseed.binance.org/" />
+      </div>
+      <div>
+        <label for="walletAddress">Wallet address to check (optional, stake-only)</label>
+        <input type="text" id="walletAddress" placeholder="0x…" autocomplete="off" spellcheck="false" />
       </div>
     </div>
 
@@ -213,6 +218,7 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
             userAddress = ethers.utils.getAddress(accounts[0]);
             byId("connectWallet").textContent = "Disconnect";
             byId("checkAcct").disabled = false;
+            updateStakeButton();
             closeModal(byId("walletModal"));
           });
           list.appendChild(item);
@@ -228,6 +234,7 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
             userAddress = ethers.utils.getAddress(accounts[0]);
             byId("connectWallet").textContent = "Disconnect";
             byId("checkAcct").disabled = false;
+            updateStakeButton();
             closeModal(byId("walletModal"));
           });
           list.appendChild(item);
@@ -256,6 +263,18 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
       // ===== Scanning =====
       function providerFromInput(inputId){
         return new ethers.providers.JsonRpcProvider(byId(inputId).value);
+      }
+
+      function stakeAccountToCheck(){
+        const suppliedAddress = byId("walletAddress").value.trim();
+        if (suppliedAddress) return ethers.utils.getAddress(suppliedAddress);
+        if (userAddress) return userAddress;
+        throw new Error("Connect a wallet or enter an address to check its stake.");
+      }
+
+      function updateStakeButton(){
+        const suppliedAddress = byId("walletAddress").value.trim();
+        byId("checkStake").disabled = !userAddress && !ethers.utils.isAddress(suppliedAddress);
       }
 
       async function fetchPoolsForGroup(group){
@@ -377,6 +396,7 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
           eip6963Index = -1; web3Provider = undefined; signer = undefined; userAddress = undefined;
           btn.textContent = "Connect wallet";
           byId("checkAcct").disabled = true;
+          updateStakeButton();
           return;
         }
         await promptWallet();
@@ -395,10 +415,35 @@ Click "Withdraw" to call the pool's withdraw(amount, [0,0]) or "Exit" for farmin
         ]);
       });
 
+      byId("checkStake").addEventListener("click", async (e) => {
+        e.preventDefault();
+        let account;
+        try {
+          account = stakeAccountToCheck();
+        } catch (error) {
+          alert(error.message);
+          return;
+        }
+
+        stopScan = false;
+        byId("tbody").innerHTML = "";
+        byId("stopScan").disabled = false;
+        openModal(byId("loadingModal"));
+        updateLoading("Checking farming positions…");
+        try {
+          await checkFarmingBalances(account);
+          if (!stopScan) updateLoading("Stake check complete.");
+        } finally {
+          closeModal(byId("loadingModal"));
+          byId("stopScan").disabled = true;
+        }
+      });
+
       const stop = () => { stopScan = true; byId("stopScan").disabled = true; closeModal(byId("loadingModal")); };
       byId("stopScan").addEventListener("click", stop);
       byId("cancelLoading").addEventListener("click", stop);
       byId("closeWalletModal").addEventListener("click", () => closeModal(byId("walletModal")));
+      byId("walletAddress").addEventListener("input", updateStakeButton);
 
       // Accessibility: close modals on Escape
       window.addEventListener("keydown", (e) => {
